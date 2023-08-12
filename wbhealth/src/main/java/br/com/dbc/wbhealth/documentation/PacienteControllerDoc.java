@@ -1,6 +1,5 @@
 package br.com.dbc.wbhealth.documentation;
 
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
@@ -27,7 +26,7 @@ public interface PacienteControllerDoc {
             }
     )
     @GetMapping
-    List<PacienteOutputDTO> findAll() throws BancoDeDadosException;
+    List<PacienteOutputDTO> findAll();
 
 
     @Operation(
@@ -45,7 +44,7 @@ public interface PacienteControllerDoc {
     )
     @GetMapping("/by-id")
     ResponseEntity<PacienteOutputDTO> findById(@RequestParam("idPaciente") @Positive Integer idPaciente)
-            throws BancoDeDadosException, EntityNotFound;
+            throws EntityNotFound;
 
 
     @Operation(
@@ -62,8 +61,7 @@ public interface PacienteControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente)
-            throws BancoDeDadosException;
+    ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente);
 
 
     @Operation(
@@ -82,7 +80,7 @@ public interface PacienteControllerDoc {
     @PutMapping("/{idPaciente}")
     ResponseEntity<PacienteOutputDTO> update(@PathVariable @Positive Integer idPaciente,
                                              @RequestBody @Valid PacienteInputDTO paciente)
-            throws BancoDeDadosException, EntityNotFound;
+            throws EntityNotFound;
 
 
     @Operation(
@@ -99,6 +97,5 @@ public interface PacienteControllerDoc {
             }
     )
     @DeleteMapping("/{idPaciente}")
-    ResponseEntity<Void> delete(@PathVariable @Positive Integer idPaciente)
-            throws BancoDeDadosException, EntityNotFound;
+    ResponseEntity<Void> delete(@PathVariable @Positive Integer idPaciente) throws EntityNotFound;
 }

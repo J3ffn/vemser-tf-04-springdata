@@ -9,13 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class Medico extends Pessoa implements Pagamento {
+public class Medico extends PessoaEntity implements Pagamento {
 
     private Integer idHospital;
     private Integer idMedico;
     private String crm;
 
-    public Medico(String nome, String cep, String dataNascimento, String cpf, Double salarioMensal, Integer idHospital, String crm, String email) {
+    public Medico(String nome, String cep, String dataNascimento, String cpf, Double salarioMensal,
+                   Integer idHospital, String crm, String email) {
         super(nome, cep, dataNascimento, cpf, salarioMensal, email);
         this.idHospital = idHospital;
         this.crm = crm;
