@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Paciente extends Pessoa {
+public class Paciente extends PessoaEntity {
     private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private Integer idPaciente;
     private Integer idHospital;
