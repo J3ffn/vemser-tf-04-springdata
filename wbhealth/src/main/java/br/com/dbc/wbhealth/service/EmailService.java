@@ -44,7 +44,7 @@ public class EmailService {
             helper.setFrom(from);
             helper.setTo(paciente.getEmail());
             helper.setSubject(tipoEmail.getTitulo());
-            helper.setText(getContentFromTemplate(paciente, estrutura, tipoEmail), true);
+            helper.setText(getContentFromTemplate(paciente, "email-templateHtml.ftl", tipoEmail), true);
 
             mailSender.send(helper.getMimeMessage());
 
@@ -58,6 +58,10 @@ public class EmailService {
         dados.put("nome", paciente.getNome());
         dados.put("id", paciente.getIdPessoa().toString());
         dados.put("emailSuporte", emailSuporte);
+        dados.put("titulo", "../resources/templates/imagens/Logo_WBHEALTH.png");
+        dados.put("facebook", "../resources/templates/imagens/Facebook.png");
+        dados.put("instagram", "../resources/templates/imagens/Instagram.png");
+        dados.put("icone", "../resources/templates/imagens/Icone_WB.png");
 
         StringBuilder estruturaDaMensagem = new StringBuilder();
 
