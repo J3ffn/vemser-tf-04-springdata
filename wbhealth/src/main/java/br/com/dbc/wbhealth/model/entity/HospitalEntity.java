@@ -5,11 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "HOSPITAL")
-public class Hospital {
+public class HospitalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "HOSPITAL_SEQ")
@@ -19,4 +21,8 @@ public class Hospital {
 
     @Column(name = "nome")
     private String nome;
+
+    @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Atendimento> atendimentos;
+
 }
