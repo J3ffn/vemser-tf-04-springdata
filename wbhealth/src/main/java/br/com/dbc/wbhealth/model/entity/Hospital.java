@@ -4,21 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
-
+import javax.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity(name = "HOSPITAL")
 public class Hospital {
 
-    @Positive
-    @NotNull
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "HOSPITAL_SEQ")
+    @SequenceGenerator(name = "HOSPITAL_SEQ", sequenceName = "seq_hospital", allocationSize = 1)
+    @Column(name = "id_hospital")
     private Integer idHospital;
 
-    @NotBlank
-    @Size(max = 50)
+    @Column(name = "nome")
     private String nome;
 }
