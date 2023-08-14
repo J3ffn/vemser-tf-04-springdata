@@ -54,12 +54,12 @@ public class MedicoService {
         MedicoEntity medico = objectMapper.convertValue(medicoInputDTO, MedicoEntity.class);
 
         MedicoEntity medicoUpdated = medicoRepository.findById(idMedico).get();
-        medicoUpdated.setNome(medico.getNome());
+        /*medicoUpdated.setNome(medico.getNome());
         medicoUpdated.setCep(medico.getCep());
         medicoUpdated.setDataNascimento(medico.getDataNascimento());
         medicoUpdated.setCpf(medico.getCpf());
         medicoUpdated.setSalarioMensal(medico.getSalarioMensal());
-        medicoUpdated.setEmail(medico.getEmail());
+        medicoUpdated.setEmail(medico.getEmail());*/
         medicoUpdated.setIdHospital(medico.getIdHospital());
         medicoUpdated.setCrm(medico.getCrm());
 

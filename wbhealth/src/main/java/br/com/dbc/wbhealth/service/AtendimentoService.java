@@ -41,8 +41,8 @@ public class AtendimentoService {
         PacienteEntity paciente = objectMapper.convertValue(pacienteService.findById(atendimento.getIdPaciente()), PacienteEntity.class);
         MedicoEntity medico = objectMapper.convertValue(medicoService.findById(atendimento.getIdMedico()), MedicoEntity.class);
 
-        emailService.sendEmailAtendimento(paciente, tipo);
-        emailService.sendEmailAtendimento(medico, tipo);
+        //emailService.sendEmailAtendimento(paciente, tipo);
+        //emailService.sendEmailAtendimento(medico, tipo);
     }
 
     private void verificarIdentificadores(AtendimentoInputDTO atendimentoDeEntrada) throws BancoDeDadosException, EntityNotFound {

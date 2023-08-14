@@ -7,14 +7,15 @@ import java.time.LocalDate;
 
 @Data
 public class PacienteOutputDTO {
-    @Schema(description = "Identificador da pessoa")
-    private Integer idPessoa;
 
     @Schema(description = "Identificador de paciente; associado à pessoa")
     private Integer idPaciente;
 
     @Schema(description = "Identificador do hospital que fornece o atendimento")
     private Integer idHospital;
+
+    @Schema(description = "Identificador da pessoa")
+    private Integer idPessoa;
 
     @Schema(description = "Nome do paciente")
     private String nome;

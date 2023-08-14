@@ -1,19 +1,16 @@
 package br.com.dbc.wbhealth.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
-import java.time.format.DateTimeFormatter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "PACIENTE")
-public class PacienteEntity extends PessoaEntity{
-    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
+public class PacienteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PACIENTE_SEQ")
     @SequenceGenerator(name = "PACIENTE_SEQ", sequenceName = "seq_paciente", allocationSize = 1)
@@ -23,7 +20,9 @@ public class PacienteEntity extends PessoaEntity{
     @Column(name = "id_hospital")
     private Integer idHospital;
 
-    @Column(name = "id_pessoa")
-    private Integer idPessoa;
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "id_pessoa", referencedColumnName = "id_pessoa")
+    private PessoaEntity pessoa;
 
 }
