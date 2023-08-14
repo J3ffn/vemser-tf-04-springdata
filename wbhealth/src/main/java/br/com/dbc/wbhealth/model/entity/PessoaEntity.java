@@ -48,4 +48,5 @@ public abstract class PessoaEntity {
         this.salarioMensal = salarioMensal;
         this.email = email;
     }
+
 }

@@ -5,31 +5,28 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class Medico extends PessoaEntity implements Pagamento {
+@Entity(name = "MEDICO")
+@PrimaryKeyJoinColumn(name = "id_pessoa", foreignKey = @ForeignKey(name = "fk_medico_pessoa"))
+public class MedicoEntity extends PessoaEntity implements Pagamento {
 
-    private Integer idHospital;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEDICO_SEQ")
+    @SequenceGenerator(name = "MEDICO_SEQ", sequenceName = "seq_medico", allocationSize = 1)
+    @Column(name = "id_medico")
     private Integer idMedico;
+
+    @Column(name = "id_hospital")
+    private Integer idHospital;
+
+
+    @Column(name = "crm")
     private String crm;
 
-    public Medico(String nome, String cep, String dataNascimento, String cpf, Double salarioMensal,
-                   Integer idHospital, String crm, String email) {
-        super(nome, cep, dataNascimento, cpf, salarioMensal, email);
-        this.idHospital = idHospital;
-        this.crm = crm;
-    }
-
-    // Getters & Setters
-    public String getCrm() {
-        return crm;
-    }
-
-    public void setCrm(String crm) {
-        this.crm = crm;
-    }
 
     @Override
     public String toString() {
