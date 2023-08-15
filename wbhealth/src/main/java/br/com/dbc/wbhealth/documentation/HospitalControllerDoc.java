@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface HospitalControllerDoc {
 
-    @Operation(summary = "Listar hospitais", description = "Cria uma lista de todos os hospitais cadastrados no sistema")
+    @Operation(summary = "Listar hospitais", description = "Lista  todos os hospitais do banco")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "Lista gerada com sucesso!"),
@@ -26,7 +26,7 @@ public interface HospitalControllerDoc {
     @GetMapping
     public ResponseEntity<List<HospitalOutputDTO>> findAll();
 
-    @Operation(summary = "Buscar hospital", description = "Busca o hospital pelo o seu id especifico")
+    @Operation(summary = "Buscar hospital pelo id", description = "Busca um hospital pelo o seu id")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "200", description = "Busca do hospital realizada com sucesso!"),
@@ -37,7 +37,7 @@ public interface HospitalControllerDoc {
     @GetMapping("/{idHospital}")
     public ResponseEntity<HospitalOutputDTO> findById(@Positive @PathVariable Integer idHospital);
 
-    @Operation(summary = "Criar hospital", description = "Cria hospital com o dado repassado pela requisicao")
+    @Operation(summary = "Adicionar hospital", description = "Cria hospital com o dado repassado pela requisicao")
     @ApiResponses(
             value = {
                     @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso!"),
