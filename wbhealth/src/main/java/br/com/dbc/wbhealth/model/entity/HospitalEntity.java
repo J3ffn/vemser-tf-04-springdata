@@ -1,16 +1,20 @@
 package br.com.dbc.wbhealth.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "HOSPITAL")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class HospitalEntity {
 
     @Id
@@ -22,7 +26,8 @@ public class HospitalEntity {
     @Column(name = "nome")
     private String nome;
 
-    @OneToMany(mappedBy = "hospital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Atendimento> atendimentos;
+    @JsonIgnore
+    @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Atendimento> atendimentos = new HashSet<>();
 
 }

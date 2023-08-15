@@ -26,10 +26,10 @@ public class HospitalService {
     }
 
     public HospitalOutputDTO findById(Integer idHospital) {
-        Optional<HospitalEntity> hospitalOptional = hospitalRepository.findById(idHospital);
-        HospitalEntity hospital = hospitalOptional.get();
-        validateExist(hospital);
-        return convertToDTO(hospital);
+//        HospitalEntity hospital = hospitalRepository.getById(idHospital);
+
+        //        return convertToDTO(hospital);
+        return objectMapper.convertValue(hospitalRepository.getById(idHospital), HospitalOutputDTO.class);
     }
 
     public HospitalOutputDTO save(HospitalInputDTO hospitalInputDTO) {
@@ -40,9 +40,10 @@ public class HospitalService {
 
     public HospitalOutputDTO update(Integer idHospital, HospitalInputDTO hospitalInputDTO) {
         HospitalEntity hospital = validateExist(idHospital);
-        HospitalEntity hospitalEntity = convertToEntity(hospitalInputDTO);
-        hospital.setNome(hospitalEntity.getNome());
-        return convertToDTO(hospitalEntity);
+        hospital.setNome(hospitalInputDTO.getNome());
+
+        hospitalRepository.save(hospital);
+        return convertToDTO(hospital);
     }
 
     public void deleteById(Integer idHospital) {
@@ -51,9 +52,9 @@ public class HospitalService {
     }
 
     private HospitalEntity validateExist(Integer idHospital) {
-        Optional<HospitalEntity> hospital = hospitalRepository.findById(idHospital);
-        validateExist(hospital.get());
-        return hospital.get();
+        HospitalEntity hospital = hospitalRepository.getById(idHospital);
+        validateExist(hospital);
+        return hospital;
     }
 
     private void validateExist(HospitalEntity hospital) {
