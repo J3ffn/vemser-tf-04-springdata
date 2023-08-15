@@ -1,8 +1,10 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
 import br.com.dbc.wbhealth.repository.PacienteRepository;
@@ -18,6 +20,7 @@ import java.util.List;
 public class PacienteService {
     private final PacienteRepository pacienteRepository;
     private final PessoaRepository pessoaRepository;
+    private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
     public List<PacienteOutputDTO> findAll(){
@@ -35,6 +38,8 @@ public class PacienteService {
 
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
+
+        pacienteCriado.getHospitalEntity().getPacientes().add(pacienteCriado);
 
         return convertPacienteToOutput(pacienteCriado);
     }
@@ -82,7 +87,11 @@ public class PacienteService {
     private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput){
         PacienteEntity paciente = new PacienteEntity();
         paciente.setPessoa(pessoa);
-        paciente.setIdHospital(pacienteInput.getIdHospital());
+
+        HospitalOutputDTO hospitalOutput = hospitalService.findById(pacienteInput.getIdHospital());
+        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        paciente.setHospitalEntity(hospital);
+
         return paciente;
     }
 
