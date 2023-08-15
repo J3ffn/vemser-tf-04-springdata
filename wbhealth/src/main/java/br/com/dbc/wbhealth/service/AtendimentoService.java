@@ -4,7 +4,9 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.entity.Atendimento;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.Paciente;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -42,16 +45,16 @@ public class AtendimentoService {
 //        emailService.sendEmailAtendimento(paciente, tipo);
 //        emailService.sendEmailAtendimento(medico, tipo);
 
-        Paciente paciente = new Paciente();
-        paciente.setEmail("sacwbhealth@gmail.com");
-        paciente.setIdPaciente(1);
-        paciente.setCpf("12345678901");
-        paciente.setCep("58970000");
-        paciente.setNome("Jeff");
-        paciente.setDataNascimento(LocalDate.now());
-        paciente.setIdPessoa(1);
-        paciente.setSalarioMensal(800.0);
-        emailService.sendEmailAtendimento(paciente, tipo);
+//        Paciente paciente = new Paciente();
+//        paciente.setEmail("sacwbhealth@gmail.com");
+//        paciente.setIdPaciente(1);
+//        paciente.setCpf("12345678901");
+//        paciente.setCep("58970000");
+//        paciente.setNome("Jeff");
+//        paciente.setDataNascimento(LocalDate.now());
+//        paciente.setIdPessoa(1);
+//        paciente.setSalarioMensal(800.0);
+//        emailService.sendEmailAtendimento(paciente, tipo);
     }
 
     private void verificarIdentificadores(AtendimentoInputDTO atendimentoDeEntrada) throws BancoDeDadosException, EntityNotFound {
@@ -67,11 +70,20 @@ public class AtendimentoService {
     public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws BancoDeDadosException, EntityNotFound, MessagingException {
         verificarIdentificadores(atendimentoNovo);
 
+        HospitalEntity hospital = objectMapper.convertValue(hospitalService.findById(atendimentoNovo.getIdHospital()), HospitalEntity.class);
+
         Atendimento atendimento = objectMapper.convertValue(atendimentoNovo, Atendimento.class);
+
+        atendimento.setHospitalEntity(hospital);
+
         atendimento = atendimentoRepository.save(atendimento);
 
         enviarEmails(atendimentoNovo, TipoEmail.CONFIRMACAO);
-        return objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
+
+        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
+        atendimentoOutputDTO.setIdHospital(hospital.getIdHospital());
+
+        return atendimentoOutputDTO;
     }
 
     public List<AtendimentoOutputDTO> findAll() throws BancoDeDadosException {

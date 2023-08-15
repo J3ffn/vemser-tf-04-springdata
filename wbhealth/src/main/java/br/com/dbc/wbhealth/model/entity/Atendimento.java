@@ -1,19 +1,19 @@
 package br.com.dbc.wbhealth.model.entity;
 
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 
-@Entity
+@Entity(name = "ATENDIMENTO")
 public class Atendimento {
 
     @Id
@@ -25,8 +25,10 @@ public class Atendimento {
 //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
 //    private Hospital idHospital;
-    @Column(name = "id_hospital")
-    private Long idHospital;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
+    private HospitalEntity hospitalEntity;
 
 //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_paciente", referencedColumnName = "id_paciente")
@@ -54,14 +56,5 @@ public class Atendimento {
     @Column(name = "valor_do_atendimento")
     private Double valorDoAtendimento;
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Id: ").append(this.idAtendimento);
-        sb.append("\nData: ").append(this.dataAtendimento.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-        sb.append("\nLaudo: ").append(this.laudo);
-        sb.append("\nTipo de Atendimento: ").append(this.tipoDeAtendimento);
-        sb.append("\nValor: R$").append(String.format("%.2f", this.valorDoAtendimento));
-        return sb.toString();
-    }
+
 }
