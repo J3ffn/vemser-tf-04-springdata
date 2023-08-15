@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class AtendimentoOutputDTO {
 
     @Schema(description = "ID do atendimento.", example = "3", required = true)
-    private Integer idAtendimento;
+    private Long idAtendimento;
 
     @Schema(description = "Id do hospital de atendimento", example = "2", required = true)
     private Integer idHospital;

@@ -6,6 +6,7 @@ import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.service.AtendimentoService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +21,10 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/atendimento")
+@RequiredArgsConstructor
 public class AtendimentoController implements AtendimentoControllerDoc {
 
-    private AtendimentoService atendimentoService;
-
-    @Autowired
-    public AtendimentoController(AtendimentoService atendimentoService) {
-        this.atendimentoService = atendimentoService;
-    }
+    private final AtendimentoService atendimentoService;
 
     @GetMapping
     public ResponseEntity<List<AtendimentoOutputDTO>> findAll() throws BancoDeDadosException {
