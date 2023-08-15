@@ -28,7 +28,7 @@ public class MedicoController implements MedicoControllerDoc {
         return new ResponseEntity<>(medicoService.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping("{idMedico}")
+    @GetMapping("/{idMedico}")
     public ResponseEntity<MedicoOutputDTO> findById(@PathVariable @Positive Integer idMedico) throws EntityNotFound{
         MedicoOutputDTO medicoOutputDTO = medicoService.findById(idMedico);
         return new ResponseEntity<>(medicoOutputDTO, HttpStatus.OK);
@@ -36,18 +36,18 @@ public class MedicoController implements MedicoControllerDoc {
 
     @PostMapping()
     public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) {
-        MedicoOutputDTO médicoCriado = medicoService.save(medicoInputDTO);
-        return new ResponseEntity<>(médicoCriado, HttpStatus.OK);
+        MedicoOutputDTO medicoCriado = medicoService.save(medicoInputDTO);
+        return new ResponseEntity<>(medicoCriado, HttpStatus.OK);
     }
 
-    @PutMapping("{idMedico}")
-    public ResponseEntity<MedicoOutputDTO> update(@PathVariable Integer idMedico,
+    @PutMapping("/{idMedico}")
+    public ResponseEntity<MedicoOutputDTO> update(@PathVariable @Positive Integer idMedico,
                                                   @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound {
         MedicoOutputDTO medicoAtualizado = medicoService.update(idMedico, medicoInputDTO);
         return new ResponseEntity<>(medicoAtualizado, HttpStatus.OK);
     }
 
-    @DeleteMapping("{idMedico}")
+    @DeleteMapping("/{idMedico}")
     public ResponseEntity<Void> deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound {
         medicoService.delete(idMedico);
         return ResponseEntity.ok().build();

@@ -1,6 +1,5 @@
 package br.com.dbc.wbhealth.service;
 
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
@@ -45,7 +44,7 @@ public class MedicoService {
         PessoaEntity pessoaModificada = convertInputToPessoa(medicoInput);
         MedicoEntity medicoModificado = convertInputToMedico(pessoaModificada, medicoInput);
 
-        MedicoEntity medico = getMédicoById(idMedico);
+        MedicoEntity medico = getMedicoById(idMedico);
         PessoaEntity pessoa = medico.getPessoa();
 
         pessoa.setNome(medicoModificado.getPessoa().getNome());
@@ -62,11 +61,11 @@ public class MedicoService {
     }
 
     public void delete(Integer idMedico) throws EntityNotFound {
-        MedicoEntity medico = getMédicoById(idMedico);
+        MedicoEntity medico = getMedicoById(idMedico);
         medicoRepository.delete(medico);
     }
 
-    private MedicoEntity getMédicoById(Integer idMedico) throws EntityNotFound {
+    private MedicoEntity getMedicoById(Integer idMedico) throws EntityNotFound {
         return medicoRepository.findById(idMedico)
                 .orElseThrow(() -> new EntityNotFound("Médico não encontrado"));
     }
