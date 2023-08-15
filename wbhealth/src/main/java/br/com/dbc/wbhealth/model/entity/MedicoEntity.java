@@ -35,10 +35,8 @@ public class MedicoEntity implements Pagamento {
     @JoinColumn(name = "id_hospital", referencedColumnName = "id_Hospital")
     private HospitalEntity hospital;
 
-//    @JsonIgnore
-//    @OneToMany
-//    @JoinColumn(mappedBy = "medicoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<AtendimentoEntity> atendimento;
+    @OneToMany(mappedBy = "medicoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AtendimentoEntity> atendimentos;
 
     @Override
     public Double calcularSalarioMensal() {

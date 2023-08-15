@@ -63,7 +63,7 @@ public class PacienteService {
         pacienteRepository.delete(paciente);
     }
 
-    private PacienteEntity getPacienteById(Integer idPaciente) throws EntityNotFound {
+    protected PacienteEntity getPacienteById(Integer idPaciente) throws EntityNotFound {
         return pacienteRepository.findById(idPaciente)
                 .orElseThrow(() -> new EntityNotFound("Paciente não encontrado"));
     }

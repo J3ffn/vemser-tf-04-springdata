@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.model.dto.atendimento;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 public class AtendimentoOutputDTO {
 
     @Schema(description = "ID do atendimento.", example = "3", required = true)
-    private Long idAtendimento;
+    private Integer idAtendimento;
 
     @Schema(description = "Id do hospital de atendimento", example = "2", required = true)
     private Integer idHospital;

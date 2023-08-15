@@ -29,10 +29,10 @@ public class HospitalEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AtendimentoEntity> pacientes;
+    private Set<PacienteEntity> pacientes;
 
     @JsonIgnore
     @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AtendimentoEntity> medicos;
+    private Set<MedicoEntity> medicos;
 
 }
