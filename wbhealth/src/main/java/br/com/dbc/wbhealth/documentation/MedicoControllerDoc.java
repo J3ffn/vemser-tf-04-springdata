@@ -23,7 +23,7 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping
-    public ResponseEntity<List<MedicoOutputDTO>> findAll() throws BancoDeDadosException;
+    public ResponseEntity<List<MedicoOutputDTO>> findAll();
 
     @Operation(summary = "Retornar medico por id", description = "Retorna um DTO com os dados do medico cujo id corresponde ao id recebido por pathVariable.")
     @ApiResponses(
@@ -35,7 +35,7 @@ public interface MedicoControllerDoc {
     )
 
     @GetMapping("{id}")
-    public ResponseEntity<MedicoOutputDTO> findById(@PathVariable int id);
+    public ResponseEntity<MedicoOutputDTO> findById(@PathVariable Integer idMedico) throws EntityNotFound;
 
     @Operation(summary = "Criar medico", description = "Cria um medico com os dados passados através do InputDTO, cria um id e salva no sistema")
     @ApiResponses(
@@ -58,7 +58,7 @@ public interface MedicoControllerDoc {
             }
     )
     @PutMapping("{id}")
-    public ResponseEntity<MedicoOutputDTO> update(@PathVariable int id, @Valid @RequestBody MedicoInputDTO medicoInputDTO);
+    public ResponseEntity<MedicoOutputDTO> update(@PathVariable Integer idMedico, @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound;
 
     @Operation(summary = "Deletar medico", description = "Exclui o médico com id correspondente ao id passado por pathVariable")
     @ApiResponses(
@@ -68,5 +68,5 @@ public interface MedicoControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    public String deleteById(@PathVariable int id) throws EntityNotFound;
+    public ResponseEntity<Void> deleteById(@PathVariable Integer idMedico) throws EntityNotFound;
 }
