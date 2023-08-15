@@ -1,6 +1,5 @@
 package br.com.dbc.wbhealth.documentation;
 
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
@@ -11,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 public interface MedicoControllerDoc {
@@ -23,7 +23,7 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping
-    public ResponseEntity<List<MedicoOutputDTO>> findAll() throws BancoDeDadosException;
+    ResponseEntity<List<MedicoOutputDTO>> findAll();
 
     @Operation(summary = "Retornar medico por id", description = "Retorna um DTO com os dados do medico cujo id corresponde ao id recebido por pathVariable.")
     @ApiResponses(
@@ -34,8 +34,8 @@ public interface MedicoControllerDoc {
             }
     )
 
-    @GetMapping("{id}")
-    public ResponseEntity<MedicoOutputDTO> findById(@PathVariable int id);
+    @GetMapping("/{idMedico}")
+    ResponseEntity<MedicoOutputDTO> findById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
 
     @Operation(summary = "Criar medico", description = "Cria um medico com os dados passados através do InputDTO, cria um id e salva no sistema")
     @ApiResponses(
@@ -46,7 +46,7 @@ public interface MedicoControllerDoc {
             }
     )
     @PostMapping()
-    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO);
+    ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO);
 
 
     @Operation(summary = "Atualizar medico", description = "Atualiza o medico correspondente ao id passado via pathVariable com os dados passados pelo InputDTO e salva no sistema")
@@ -57,8 +57,9 @@ public interface MedicoControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    @PutMapping("{id}")
-    public ResponseEntity<MedicoOutputDTO> update(@PathVariable int id, @Valid @RequestBody MedicoInputDTO medicoInputDTO);
+    @PutMapping("/{idMedico}")
+    ResponseEntity<MedicoOutputDTO> update(@PathVariable @Positive Integer idMedico,
+                                           @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound;
 
     @Operation(summary = "Deletar medico", description = "Exclui o médico com id correspondente ao id passado por pathVariable")
     @ApiResponses(
@@ -68,5 +69,6 @@ public interface MedicoControllerDoc {
                     @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
             }
     )
-    public String deleteById(@PathVariable int id) throws EntityNotFound;
+    @DeleteMapping("/{idMedico}")
+    ResponseEntity<Void> deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
 }
