@@ -65,7 +65,7 @@ public class MedicoService {
         medicoRepository.delete(medico);
     }
 
-    private MedicoEntity getMedicoById(Integer idMedico) throws EntityNotFound {
+    protected MedicoEntity getMedicoById(Integer idMedico) throws EntityNotFound {
         return medicoRepository.findById(idMedico)
                 .orElseThrow(() -> new EntityNotFound("Médico não encontrado"));
     }

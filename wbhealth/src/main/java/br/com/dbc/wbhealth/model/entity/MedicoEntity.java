@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -28,6 +29,10 @@ public class MedicoEntity implements Pagamento {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "id_pessoa", referencedColumnName = "id_pessoa")
     private PessoaEntity pessoa;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "medicoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AtendimentoEntity> atendimentos;
 
     @Override
     public Double calcularSalarioMensal() {
