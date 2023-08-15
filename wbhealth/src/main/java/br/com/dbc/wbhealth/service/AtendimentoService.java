@@ -4,15 +4,17 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
-import br.com.dbc.wbhealth.model.entity.Atendimento;
+import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import br.com.dbc.wbhealth.model.entity.HospitalEntity;
-import br.com.dbc.wbhealth.model.entity.Paciente;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
+import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +23,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-@RequiredArgsConstructor
-
 @Service
+@RequiredArgsConstructor
 public class AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
@@ -70,18 +71,13 @@ public class AtendimentoService {
     public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws BancoDeDadosException, EntityNotFound, MessagingException {
         verificarIdentificadores(atendimentoNovo);
 
-        HospitalEntity hospital = objectMapper.convertValue(hospitalService.findById(atendimentoNovo.getIdHospital()), HospitalEntity.class);
-
-        Atendimento atendimento = objectMapper.convertValue(atendimentoNovo, Atendimento.class);
-
-        atendimento.setHospitalEntity(hospital);
+        AtendimentoEntity atendimento = setFKInAtendimento(atendimentoNovo);
 
         atendimento = atendimentoRepository.save(atendimento);
 
         enviarEmails(atendimentoNovo, TipoEmail.CONFIRMACAO);
 
-        AtendimentoOutputDTO atendimentoOutputDTO = objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class);
-        atendimentoOutputDTO.setIdHospital(hospital.getIdHospital());
+        AtendimentoOutputDTO atendimentoOutputDTO = setFKInAtendimentoDTO(objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class), atendimento);
 
         return atendimentoOutputDTO;
     }
@@ -89,12 +85,14 @@ public class AtendimentoService {
     public List<AtendimentoOutputDTO> findAll() throws BancoDeDadosException {
         return atendimentoRepository.findAll()
                 .stream()
-                .map(atendimento -> objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class))
+                .map(this::atendimentoEntityToAtendimentoOutput)
                 .toList();
     }
 
-    public AtendimentoOutputDTO findById(Integer id) throws BancoDeDadosException, EntityNotFound {
-        return objectMapper.convertValue(atendimentoRepository.findById(id.longValue()), AtendimentoOutputDTO.class);
+    public AtendimentoOutputDTO findById(Integer idAtendimento) throws BancoDeDadosException, EntityNotFound {
+        AtendimentoEntity atendimento = atendimentoRepository.getById(idAtendimento);
+
+        return atendimentoEntityToAtendimentoOutput(atendimento);
     }
 
     public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws BancoDeDadosException {
@@ -107,25 +105,77 @@ public class AtendimentoService {
     public AtendimentoOutputDTO update(Integer idAtendimento, AtendimentoInputDTO atendimentoAtualizado) throws BancoDeDadosException, EntityNotFound, MessagingException {
         verificarIdentificadores(atendimentoAtualizado);
 
-        Atendimento atendimentoConvertido = objectMapper.convertValue(atendimentoAtualizado, Atendimento.class);
-        Atendimento atendimentoModificado = atendimentoRepository.save(atendimentoConvertido);
-        atendimentoModificado.setIdAtendimento(idAtendimento);
+        AtendimentoEntity atendimentoConvertido = setFKInAtendimento(atendimentoAtualizado);
+
+        atendimentoConvertido.setLaudo(atendimentoConvertido.getLaudo());
+        atendimentoConvertido.setTipoDeAtendimento(TipoDeAtendimento.valueOf(atendimentoAtualizado.getTipoDeAtendimento()));
+        atendimentoConvertido.setDataAtendimento(atendimentoAtualizado.getDataAtendimento());
+
+        atendimentoConvertido = atendimentoRepository.save(atendimentoConvertido);
 
         enviarEmails(atendimentoAtualizado, TipoEmail.ATUALIZACAO);
-        return objectMapper.convertValue(atendimentoModificado, AtendimentoOutputDTO.class);
+
+        AtendimentoOutputDTO atendimentoOutputDTO = this.setFKInAtendimentoDTO(objectMapper.convertValue(atendimentoAtualizado, AtendimentoOutputDTO.class), atendimentoConvertido);
+
+        return atendimentoOutputDTO;
     }
 
     public void deletarPeloId(Integer id) throws EntityNotFound {
         try {
             AtendimentoInputDTO atendimento = objectMapper.convertValue(findById(id), AtendimentoInputDTO.class);
 
-            atendimentoRepository.deleteById(id.longValue());
+            atendimentoRepository.deleteById(id);
 
             enviarEmails(atendimento, TipoEmail.CANCELAMENTO);
 
         } catch (BancoDeDadosException | MessagingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private AtendimentoOutputDTO atendimentoEntityToAtendimentoOutput(AtendimentoEntity atendimento) {
+        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
+        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
+        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
+        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
+        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
+        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
+        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
+        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
+        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
+
+        return atendimentoOutputDTO;
+    }
+
+    private AtendimentoEntity setFKInAtendimento(AtendimentoInputDTO atendimentoDTO) throws EntityNotFound {
+        AtendimentoEntity atendimento = new AtendimentoEntity();
+
+        HospitalEntity hospital = objectMapper.convertValue(hospitalService.findById(atendimentoDTO.getIdHospital()), HospitalEntity.class);
+
+        MedicoEntity medico = medicoService.getMedicoById(atendimentoDTO.getIdMedico());
+
+        PacienteEntity paciente = pacienteService.getPacienteById(atendimentoDTO.getIdPaciente());
+
+        atendimento.setPacienteEntity(paciente);
+
+        atendimento.setMedicoEntity(medico);
+
+        atendimento.setHospitalEntity(hospital);
+
+        atendimento.setLaudo(atendimentoDTO.getLaudo());
+        atendimento.setValorDoAtendimento(atendimentoDTO.getValorDoAtendimento());
+        atendimento.setTipoDeAtendimento(TipoDeAtendimento.valueOf(atendimentoDTO.getTipoDeAtendimento()));
+        atendimento.setDataAtendimento(atendimentoDTO.getDataAtendimento());
+
+        return atendimento;
+    }
+
+    private AtendimentoOutputDTO setFKInAtendimentoDTO(AtendimentoOutputDTO atendimentoOutputDTO, AtendimentoEntity atendimento) {
+        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
+        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
+        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
+
+        return atendimentoOutputDTO;
     }
 
 }

@@ -2,19 +2,18 @@ package br.com.dbc.wbhealth.model.entity;
 
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
 @Entity(name = "ATENDIMENTO")
-public class Atendimento {
+public class AtendimentoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ATENDIMENTO_SEQ")
@@ -22,26 +21,18 @@ public class Atendimento {
     @Column(name = "id_atendimento")
     private Integer idAtendimento;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
-//    private Hospital idHospital;
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
     private HospitalEntity hospitalEntity;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "id_paciente", referencedColumnName = "id_paciente")
-//    private Paciente idPaciente;
-    @Column(name = "id_paciente")
-    private Integer idPaciente;
+    @ManyToOne
+    @JoinColumn(name = "id_paciente", referencedColumnName = "id_paciente")
+    private PacienteEntity pacienteEntity;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "id_medico", referencedColumnName = "id_medico", table = "medico")
-//    private Medico idMedico;
-
-    @Column(name = "id_medico")
-    private Integer idMedico;
+    @ManyToOne
+    @JoinColumn(name = "id_medico", referencedColumnName = "id_medico")
+    private MedicoEntity medicoEntity;
 
     @Column(name = "data_atendimento")
     private LocalDate dataAtendimento;
@@ -50,11 +41,10 @@ public class Atendimento {
     private String laudo;
 
     @Column(name = "tipo_de_atendimento")
-    @Enumerated(EnumType.ORDINAL) // Tornar cardinal depois
+    @Enumerated(EnumType.STRING) // Tornar cardinal depois
     private TipoDeAtendimento tipoDeAtendimento;
 
-    @Column(name = "valor_do_atendimento")
+    @Column(name = "valor_atendimento")
     private Double valorDoAtendimento;
-
 
 }
