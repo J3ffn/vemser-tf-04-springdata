@@ -104,12 +104,12 @@ public class AtendimentoService {
                 .toList();
     }
 
-    public AtendimentoOutputDTO update(Integer id, AtendimentoInputDTO atendimentoAtualizado) throws BancoDeDadosException, EntityNotFound, MessagingException {
+    public AtendimentoOutputDTO update(Integer idAtendimento, AtendimentoInputDTO atendimentoAtualizado) throws BancoDeDadosException, EntityNotFound, MessagingException {
         verificarIdentificadores(atendimentoAtualizado);
 
         Atendimento atendimentoConvertido = objectMapper.convertValue(atendimentoAtualizado, Atendimento.class);
         Atendimento atendimentoModificado = atendimentoRepository.save(atendimentoConvertido);
-        atendimentoModificado.setIdAtendimento(id.longValue());
+        atendimentoModificado.setIdAtendimento(idAtendimento);
 
         enviarEmails(atendimentoAtualizado, TipoEmail.ATUALIZACAO);
         return objectMapper.convertValue(atendimentoModificado, AtendimentoOutputDTO.class);
