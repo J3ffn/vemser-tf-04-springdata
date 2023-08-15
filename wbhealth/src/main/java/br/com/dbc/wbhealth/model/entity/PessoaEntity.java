@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-//@Inheritance(strategy = InheritanceType.JOINED)
 @Entity(name = "PESSOA")
 public class PessoaEntity {
     @Id

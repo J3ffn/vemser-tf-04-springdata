@@ -30,22 +30,28 @@ public class PacienteService {
     }
 
     public PacienteOutputDTO save(PacienteInputDTO pacienteInput){
-        PacienteEntity paciente = convertInputToPaciente(pacienteInput);
-        pessoaRepository.save(paciente.getPessoa());
+        PessoaEntity pessoa = convertInputToPessoa(pacienteInput);
+        PessoaEntity pessoaCriada = pessoaRepository.save(pessoa);
+
+        PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
+
         return convertPacienteToOutput(pacienteCriado);
     }
 
     public PacienteOutputDTO update(Integer idPaciente, PacienteInputDTO pacienteInput) throws EntityNotFound {
-        PacienteEntity paciente = getPacienteById(idPaciente);
-        PacienteEntity pacienteModificado = convertInputToPaciente(pacienteInput);
+        PessoaEntity pessoaModificada = convertInputToPessoa(pacienteInput);
+        PacienteEntity pacienteModificado = convertInputToPaciente(pessoaModificada, pacienteInput);
 
-        paciente.getPessoa().setNome(pacienteModificado.getPessoa().getNome());
-        paciente.getPessoa().setCep(pacienteModificado.getPessoa().getCep());
-        paciente.getPessoa().setDataNascimento(pacienteModificado.getPessoa().getDataNascimento());
-        paciente.getPessoa().setCpf(pacienteModificado.getPessoa().getCpf());
-        paciente.getPessoa().setSalarioMensal(pacienteModificado.getPessoa().getSalarioMensal());
-        paciente.getPessoa().setEmail(pacienteModificado.getPessoa().getEmail());
+        PacienteEntity paciente = getPacienteById(idPaciente);
+        PessoaEntity pessoa = paciente.getPessoa();
+
+        pessoa.setNome(pacienteModificado.getPessoa().getNome());
+        pessoa.setCep(pacienteModificado.getPessoa().getCep());
+        pessoa.setDataNascimento(pacienteModificado.getPessoa().getDataNascimento());
+        pessoa.setCpf(pacienteModificado.getPessoa().getCpf());
+        pessoa.setSalarioMensal(pacienteModificado.getPessoa().getSalarioMensal());
+        pessoa.setEmail(pacienteModificado.getPessoa().getEmail());
 
         pessoaRepository.save(paciente.getPessoa());
         PacienteEntity pacienteAtualizado = pacienteRepository.save(paciente);
@@ -62,10 +68,8 @@ public class PacienteService {
                 .orElseThrow(() -> new EntityNotFound("Paciente não encontrado"));
     }
 
-    private PacienteEntity convertInputToPaciente(PacienteInputDTO pacienteInput){
-        PacienteEntity paciente = objectMapper.convertValue(pacienteInput, PacienteEntity.class);
-
-        PessoaEntity pessoa = new PessoaEntity(
+    private PessoaEntity convertInputToPessoa(PacienteInputDTO pacienteInput){
+        return new PessoaEntity(
                 pacienteInput.getNome(),
                 pacienteInput.getCep(),
                 pacienteInput.getDataNascimento(),
@@ -73,8 +77,12 @@ public class PacienteService {
                 pacienteInput.getSalarioMensal(),
                 pacienteInput.getEmail()
         );
+    }
 
+    private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput){
+        PacienteEntity paciente = new PacienteEntity();
         paciente.setPessoa(pessoa);
+        paciente.setIdHospital(pacienteInput.getIdHospital());
         return paciente;
     }
 
