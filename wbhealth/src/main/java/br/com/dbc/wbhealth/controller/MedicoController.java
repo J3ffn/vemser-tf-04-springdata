@@ -25,26 +25,26 @@ public class MedicoController implements MedicoControllerDoc {
 
     @GetMapping
     public ResponseEntity<List<MedicoOutputDTO>> findAll() {
-        return ResponseEntity.status(HttpStatus.OK).body(medicoService.findAll());
+        return new ResponseEntity<>(medicoService.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("{idMedico}")
     public ResponseEntity<MedicoOutputDTO> findById(@PathVariable @Positive Integer idMedico) throws EntityNotFound{
         MedicoOutputDTO medicoOutputDTO = medicoService.findById(idMedico);
-        return ResponseEntity.status(HttpStatus.OK).body(medicoOutputDTO);
+        return new ResponseEntity<>(medicoOutputDTO, HttpStatus.OK);
     }
 
     @PostMapping()
     public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) {
         MedicoOutputDTO médicoCriado = medicoService.save(medicoInputDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(médicoCriado);
+        return new ResponseEntity<>(médicoCriado, HttpStatus.OK);
     }
 
     @PutMapping("{idMedico}")
     public ResponseEntity<MedicoOutputDTO> update(@PathVariable Integer idMedico,
                                                   @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound {
         MedicoOutputDTO medicoAtualizado = medicoService.update(idMedico, medicoInputDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(medicoAtualizado);
+        return new ResponseEntity<>(medicoAtualizado, HttpStatus.OK);
     }
 
     @DeleteMapping("{idMedico}")

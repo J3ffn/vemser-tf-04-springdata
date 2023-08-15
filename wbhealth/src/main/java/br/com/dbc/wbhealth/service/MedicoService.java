@@ -32,27 +32,13 @@ public class MedicoService {
 
     public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO){
 
-        PessoaEntity pessoaEntity = new PessoaEntity(
-                medicoInputDTO.getNome(),
-                medicoInputDTO.getCep(),
-                medicoInputDTO.getDataNascimento(),
-                medicoInputDTO.getCpf(),
-                medicoInputDTO.getSalarioMensal(),
-                medicoInputDTO.getEmail()
-        );
-
+        PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
         PessoaEntity pessoaSave = pessoaRepository.save(pessoaEntity);
 
-        MedicoEntity medico = new MedicoEntity();
-        medico.setPessoa(pessoaSave);
-        medico.setCrm(medicoInputDTO.getCrm());
-        medico.setIdHospital(medicoInputDTO.getIdHospital());
-
+        MedicoEntity medico = convertInputToMedico(pessoaSave, medicoInputDTO);
         MedicoEntity medicoAtualizado = medicoRepository.save(medico);
 
-        MedicoOutputDTO medicoOutputDTO = converterMedicoOutput(medicoAtualizado);
-
-        return medicoOutputDTO;
+        return converterMedicoOutput(medicoAtualizado);
     }
 
     public MedicoOutputDTO update(Integer idMedico, MedicoInputDTO medicoInput) throws EntityNotFound {
@@ -96,21 +82,24 @@ public class MedicoService {
         );
     }
     public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) {
-        MedicoEntity medicoEntity = objectMapper.convertValue(medicoInput, MedicoEntity.class);
-
-        return medicoEntity;
+        MedicoEntity medico = new MedicoEntity();
+        medico.setPessoa(pessoa);
+        medico.setCrm(medicoInput.getCrm());
+        medico.setIdHospital(medicoInput.getIdHospital());
+        return medico;
     }
 
     public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
         MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
 
-        medicoOutput.setNome(medico.getPessoa().getNome());
-        medicoOutput.setCep(medico.getPessoa().getCep());
-        medicoOutput.setDataNascimento(medico.getPessoa().getDataNascimento());
-        medicoOutput.setCpf(medico.getPessoa().getCpf());
-        medicoOutput.setSalarioMensal(medico.getPessoa().getSalarioMensal());
-        medicoOutput.setEmail(medico.getPessoa().getEmail());
-        medicoOutput.setIdPessoa(medico.getPessoa().getIdPessoa());
+        PessoaEntity pessoa = medico.getPessoa();
+        medicoOutput.setNome(pessoa.getNome());
+        medicoOutput.setCep(pessoa.getCep());
+        medicoOutput.setDataNascimento(pessoa.getDataNascimento());
+        medicoOutput.setCpf(pessoa.getCpf());
+        medicoOutput.setSalarioMensal(pessoa.getSalarioMensal());
+        medicoOutput.setEmail(pessoa.getEmail());
+        medicoOutput.setIdPessoa(pessoa.getIdPessoa());
 
         return medicoOutput;
     }
