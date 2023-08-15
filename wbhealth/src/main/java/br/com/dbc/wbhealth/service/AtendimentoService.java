@@ -4,10 +4,10 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
-import br.com.dbc.wbhealth.model.entity.Atendimento;
+import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import br.com.dbc.wbhealth.model.entity.HospitalEntity;
-import br.com.dbc.wbhealth.model.entity.Paciente;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,9 +21,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
-@RequiredArgsConstructor
-
 @Service
+@RequiredArgsConstructor
 public class AtendimentoService {
 
     private final AtendimentoRepository atendimentoRepository;
@@ -72,7 +71,7 @@ public class AtendimentoService {
 
         HospitalEntity hospital = objectMapper.convertValue(hospitalService.findById(atendimentoNovo.getIdHospital()), HospitalEntity.class);
 
-        Atendimento atendimento = objectMapper.convertValue(atendimentoNovo, Atendimento.class);
+        AtendimentoEntity atendimento = objectMapper.convertValue(atendimentoNovo, AtendimentoEntity.class);
 
         atendimento.setHospitalEntity(hospital);
 
@@ -94,7 +93,7 @@ public class AtendimentoService {
     }
 
     public AtendimentoOutputDTO findById(Integer id) throws BancoDeDadosException, EntityNotFound {
-        return objectMapper.convertValue(atendimentoRepository.findById(id.longValue()), AtendimentoOutputDTO.class);
+        return objectMapper.convertValue(atendimentoRepository.findById(id), AtendimentoOutputDTO.class);
     }
 
     public List<AtendimentoOutputDTO> bucarAtendimentoPeloIdUsuario(Integer idPaciente) throws BancoDeDadosException {
@@ -107,9 +106,9 @@ public class AtendimentoService {
     public AtendimentoOutputDTO update(Integer id, AtendimentoInputDTO atendimentoAtualizado) throws BancoDeDadosException, EntityNotFound, MessagingException {
         verificarIdentificadores(atendimentoAtualizado);
 
-        Atendimento atendimentoConvertido = objectMapper.convertValue(atendimentoAtualizado, Atendimento.class);
-        Atendimento atendimentoModificado = atendimentoRepository.save(atendimentoConvertido);
-        atendimentoModificado.setIdAtendimento(id.longValue());
+        AtendimentoEntity atendimentoConvertido = objectMapper.convertValue(atendimentoAtualizado, AtendimentoEntity.class);
+        AtendimentoEntity atendimentoModificado = atendimentoRepository.save(atendimentoConvertido);
+        atendimentoModificado.setIdAtendimento(id);
 
         enviarEmails(atendimentoAtualizado, TipoEmail.ATUALIZACAO);
         return objectMapper.convertValue(atendimentoModificado, AtendimentoOutputDTO.class);
@@ -119,7 +118,7 @@ public class AtendimentoService {
         try {
             AtendimentoInputDTO atendimento = objectMapper.convertValue(findById(id), AtendimentoInputDTO.class);
 
-            atendimentoRepository.deleteById(id.longValue());
+            atendimentoRepository.deleteById(id);
 
             enviarEmails(atendimento, TipoEmail.CANCELAMENTO);
 

@@ -1,6 +1,6 @@
 package br.com.dbc.wbhealth.service;
 
-import br.com.dbc.wbhealth.model.entity.Pessoa;
+import br.com.dbc.wbhealth.model.entity.PessoaEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.utils.ImageConverter;
 import freemarker.template.Configuration;
@@ -42,11 +42,11 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String emailSuporte;
 
-    public void sendEmailAtendimento(Pessoa pessoa, TipoEmail tipoEmail) throws MessagingException {
+    public void sendEmailAtendimento(PessoaEntity pessoa, TipoEmail tipoEmail) throws MessagingException {
         sendTemplateEmail(pessoa, "email-atendimento.ftl", tipoEmail);
     }
 
-    public void sendTemplateEmail(Pessoa paciente, String estrutura, TipoEmail tipoEmail) throws MessagingException {
+    public void sendTemplateEmail(PessoaEntity paciente, String estrutura, TipoEmail tipoEmail) throws MessagingException {
         MimeMessage emailTemplate = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(emailTemplate, true);
 
@@ -106,7 +106,7 @@ public class EmailService {
         return html;
     }
 
-    private String getContentFromTemplate(Pessoa paciente, String estruturaTemplate, TipoEmail tipoEmail) throws IOException, TemplateException {
+    private String getContentFromTemplate(PessoaEntity paciente, String estruturaTemplate, TipoEmail tipoEmail) throws IOException, TemplateException {
         Map<String, Object> dados = new HashMap<>();
         dados.put("nome", paciente.getNome());
         dados.put("id", paciente.getIdPessoa().toString());
