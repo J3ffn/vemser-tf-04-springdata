@@ -27,4 +27,12 @@ public class HospitalEntity {
     @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AtendimentoEntity> atendimentos;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AtendimentoEntity> pacientes;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "hospitalEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AtendimentoEntity> medicos;
+
 }
