@@ -18,8 +18,10 @@ public class PacienteEntity {
     @Column(name = "id_paciente")
     private Integer idPaciente;
 
-    @Column(name = "id_hospital")
-    private Integer idHospital;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
+    private HospitalEntity hospitalEntity;
 
     @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
@@ -27,7 +29,11 @@ public class PacienteEntity {
     private PessoaEntity pessoa;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "pacienteEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "pacienteEntity",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<AtendimentoEntity> atendimentos;
 
 }
