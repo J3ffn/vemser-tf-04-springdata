@@ -6,21 +6,19 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-
 @Entity(name = "ATENDIMENTO")
-public class Atendimento {
+public class AtendimentoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ATENDIMENTO_SEQ")
     @SequenceGenerator(name = "ATENDIMENTO_SEQ", sequenceName = "SEQ_ATENDIMENTO", allocationSize = 1)
     @Column(name = "id_atendimento")
-    private Long idAtendimento;
+    private Integer idAtendimento;
 
 //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
@@ -34,14 +32,14 @@ public class Atendimento {
 //    @JoinColumn(name = "id_paciente", referencedColumnName = "id_paciente")
 //    private Paciente idPaciente;
     @Column(name = "id_paciente")
-    private Long idPaciente;
+    private Integer idPaciente;
 
 //    @OneToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "id_medico", referencedColumnName = "id_medico", table = "medico")
 //    private Medico idMedico;
 
     @Column(name = "id_medico")
-    private Long idMedico;
+    private Integer idMedico;
 
     @Column(name = "data_atendimento")
     private LocalDate dataAtendimento;
@@ -53,8 +51,7 @@ public class Atendimento {
     @Enumerated(EnumType.ORDINAL) // Tornar cardinal depois
     private TipoDeAtendimento tipoDeAtendimento;
 
-    @Column(name = "valor_do_atendimento")
+    @Column(name = "valor_atendimento")
     private Double valorDoAtendimento;
-
 
 }
