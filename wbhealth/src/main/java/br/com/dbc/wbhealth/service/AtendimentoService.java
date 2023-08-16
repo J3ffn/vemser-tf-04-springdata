@@ -15,6 +15,7 @@ import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -163,11 +164,15 @@ public class AtendimentoService {
         return atendimentoOutputDTO;
     }
 
-    public Page<AtendimentoOutputDTO> findAllPaginada(Pageable paginacao) {
+    public Page<AtendimentoOutputDTO> findAllPaginada(Integer pagina, Integer quantidadeRegistros) {
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
         return atendimentoRepository.findAll(paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 
-    public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio, String fim, Pageable paginacao) throws DataInvalidaException {
+    public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio,
+                                                            String fim,
+                                                            Integer pagina,
+                                                            Integer quantidadeRegistros) throws DataInvalidaException {
         LocalDate dataInicio;
         LocalDate dataFim;
         try {
@@ -176,6 +181,8 @@ public class AtendimentoService {
         } catch (Exception e) {
             throw new DataInvalidaException("Data inválida!");
         }
+
+        Pageable paginacao = PageRequest.of(pagina, quantidadeRegistros);
         return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 }
