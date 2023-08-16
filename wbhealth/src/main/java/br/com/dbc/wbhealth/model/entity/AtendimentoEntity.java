@@ -2,7 +2,6 @@ package br.com.dbc.wbhealth.model.entity;
 
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.*;
@@ -26,10 +25,12 @@ public class AtendimentoEntity {
     @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
     private HospitalEntity hospitalEntity;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_paciente", referencedColumnName = "id_paciente")
     private PacienteEntity pacienteEntity;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "id_medico", referencedColumnName = "id_medico")
     private MedicoEntity medicoEntity;
