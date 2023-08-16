@@ -3,7 +3,6 @@ package br.com.dbc.wbhealth.service;
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
@@ -31,20 +30,19 @@ public class PacienteService {
     private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
-    public List<PacienteOutputDTO> findAll(Integer pagina, Integer quantidadeRegistros){
+    public Page<PacienteOutputDTO> findAll(Integer pagina, Integer quantidadeRegistros){
         Sort ordenacao = Sort.by("idPaciente");
         Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
-        Page<PacienteEntity> pacientesPaginados = pacienteRepository.findAll(pageable);
 
-        return pacientesPaginados.getContent().stream().map(this::convertPacienteToOutput).toList();
+        return pacienteRepository.findAll(pageable).map(this::convertPacienteToOutput);
     }
 
-    public List<PacienteAtendimentosOutputDTO> findAllAtendimentos(Integer pagina, Integer quantidadeRegistros) {
+    public Page<PacienteAtendimentosOutputDTO> findAllAtendimentos(Integer pagina, Integer quantidadeRegistros) {
         Sort ordenacao = Sort.by("idPaciente");
         Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
         Page<PacienteEntity> pacientesPaginados = pacienteRepository.findAll(pageable);
 
-        return pacientesPaginados.getContent().stream().map(this::convertToPacienteAtendimentosOutput).toList();
+        return pacientesPaginados.map(this::convertToPacienteAtendimentosOutput);
     }
 
     public PacienteOutputDTO findById(Integer idPaciente) throws EntityNotFound {
@@ -52,12 +50,13 @@ public class PacienteService {
         return convertPacienteToOutput(pacienteEncontrado);
     }
 
-    public PacienteOutputDTO save(PacienteInputDTO pacienteInput) throws BancoDeDadosException {
+    public PacienteOutputDTO save(PacienteInputDTO pacienteInput) throws BancoDeDadosException, EntityNotFound {
         PessoaEntity pessoa = convertInputToPessoa(pacienteInput);
 
         if (pessoaRepository.existsByCpf(pessoa.getCpf())) {
             throw new BancoDeDadosException("CPF já cadastrado.");
         }
+
         PessoaEntity pessoaCriada = pessoaRepository.save(pessoa);
 
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
@@ -106,12 +105,12 @@ public class PacienteService {
         return pessoa;
     }
 
-    private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput){
+    private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput)
+            throws EntityNotFound {
         PacienteEntity paciente = new PacienteEntity();
         paciente.setPessoa(pessoa);
 
-        HospitalOutputDTO hospitalOutput = hospitalService.findById(pacienteInput.getIdHospital());
-        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        HospitalEntity hospital = hospitalService.getHospitalById(pacienteInput.getIdHospital());
         paciente.setHospitalEntity(hospital);
 
         return paciente;

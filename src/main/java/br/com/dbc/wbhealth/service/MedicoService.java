@@ -2,7 +2,6 @@ package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
-import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
@@ -15,7 +14,10 @@ import br.com.dbc.wbhealth.repository.MedicoRepository;
 import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,17 +33,18 @@ public class MedicoService {
     private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
-    public List<MedicoOutputDTO> findAll(Pageable pageable){
-        return medicoRepository.findAll(pageable)
-                .getContent().stream().map(this::converterMedicoOutput).toList();
+    public Page<MedicoOutputDTO> findAll(Integer pagina, Integer quantidadeRegistros){
+        Sort ordenacao = Sort.by("idMedico");
+        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+        return medicoRepository.findAll(pageable).map(this::converterMedicoOutput);
     }
 
     public MedicoOutputDTO findById(Integer idMedico) throws EntityNotFound {
-        MedicoEntity medicoEncontrado = medicoRepository.findById(idMedico).get();
+        MedicoEntity medicoEncontrado = getMedicoById(idMedico);
         return converterMedicoOutput(medicoEncontrado);
     }
 
-    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException {
+    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound {
 
         PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
         if (pessoaRepository.existsByCpf(pessoaEntity.getCpf())) {
@@ -100,13 +103,13 @@ public class MedicoService {
         );
 
     }
-    public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) {
+
+    public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) throws EntityNotFound {
         MedicoEntity medico = new MedicoEntity();
         medico.setPessoa(pessoa);
         medico.setCrm(medicoInput.getCrm());
 
-        HospitalOutputDTO hospitalOutput = hospitalService.findById(medicoInput.getIdHospital());
-        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        HospitalEntity hospital = hospitalService.getHospitalById(medicoInput.getIdHospital());
         medico.setHospitalEntity(hospital);
 
         return medico;
@@ -128,7 +131,9 @@ public class MedicoService {
         return medicoOutput;
     }
 
-    public List<MedicoAtendimentoDTO> generateMedicoAtendimento(Integer idMedico, LocalDate dataInicio, LocalDate dataFim) throws EntityNotFound {
+    public List<MedicoAtendimentoDTO> generateMedicoAtendimento(Integer idMedico,
+                                                                LocalDate dataInicio,
+                                                                LocalDate dataFim) throws EntityNotFound {
         MedicoEntity medico = getMedicoById(idMedico);
         if(medico == null) {
             throw new EntityNotFound("Médico não encontrado com o ID: " + idMedico);

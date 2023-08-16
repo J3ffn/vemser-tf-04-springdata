@@ -1,11 +1,13 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalInputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +28,8 @@ public interface HospitalControllerDoc {
     )
 
     @GetMapping
-    public ResponseEntity<List<HospitalOutputDTO>> findAll();
+    ResponseEntity<List<HospitalOutputDTO>>
+    findAll();
 
     @Operation(summary = "Buscar hospital pelo id", description = "Busca um hospital pelo o seu id")
     @ApiResponses(
@@ -37,7 +40,8 @@ public interface HospitalControllerDoc {
             }
     )
     @GetMapping("/{idHospital}")
-    public ResponseEntity<HospitalOutputDTO> findById(@Positive @PathVariable Integer idHospital);
+    ResponseEntity<HospitalOutputDTO>
+    findById(@Positive @PathVariable Integer idHospital) throws EntityNotFound;
 
     @Operation(
             summary = "Listar Hospitais com Atendimentos",
@@ -53,8 +57,11 @@ public interface HospitalControllerDoc {
             }
     )
     @GetMapping("/atendimentos")
-    List<HospitalAtendimentoDTO> findHospitaisWithAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
-                                                     @RequestParam @Positive Integer quantidadeRegistros);
+    ResponseEntity<Page<HospitalAtendimentoDTO>>
+    findHospitaisWithAllAtendimentos(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    );
 
     @Operation(summary = "Adicionar hospital", description = "Cria hospital com o dado repassado pela requisicao")
     @ApiResponses(
@@ -65,7 +72,8 @@ public interface HospitalControllerDoc {
             }
     )
     @PostMapping
-    public ResponseEntity<HospitalOutputDTO> save(@Valid @RequestBody HospitalInputDTO hospital);
+    ResponseEntity<HospitalOutputDTO>
+    save(@Valid @RequestBody HospitalInputDTO hospital);
 
     @Operation(summary = "Alterar hospital", description = "Altera hospital com dados que sao repassados pela requisicao")
     @ApiResponses(
@@ -76,7 +84,9 @@ public interface HospitalControllerDoc {
             }
     )
     @PutMapping("/{idHospital}")
-    public ResponseEntity<HospitalOutputDTO> update(@Positive @PathVariable Integer idHospital, @Valid @RequestBody HospitalInputDTO hospital);
+    ResponseEntity<HospitalOutputDTO>
+    update(@Positive @PathVariable Integer idHospital,
+           @Valid @RequestBody HospitalInputDTO hospital) throws EntityNotFound;
 
     @Operation(summary = "Deletar hospital", description = "Deleta o hospital pelo o seu id especifico")
     @ApiResponses(
@@ -87,5 +97,6 @@ public interface HospitalControllerDoc {
             }
     )
     @DeleteMapping("/{idHospital}")
-    public ResponseEntity<Boolean> deleteById(@Positive @PathVariable Integer idHospital);
+    ResponseEntity<Void>
+    deleteById(@Positive @PathVariable Integer idHospital) throws EntityNotFound;
 }

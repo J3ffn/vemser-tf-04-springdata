@@ -1,6 +1,6 @@
 package br.com.dbc.wbhealth.service;
 
-import br.com.dbc.wbhealth.exceptions.NegocioException;
+import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalInputDTO;
@@ -17,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +30,9 @@ public class HospitalService {
         return convertListToDTO(hospitais);
     }
 
-    public HospitalOutputDTO findById(Integer idHospital) {
-        validateExist(idHospital);
-        return convertToDTO(hospitalRepository.getById(idHospital));
+    public HospitalOutputDTO findById(Integer idHospital) throws EntityNotFound {
+        HospitalEntity hospital = getHospitalById(idHospital);
+        return convertToDTO(hospital);
     }
 
     public HospitalOutputDTO save(HospitalInputDTO hospitalInputDTO) {
@@ -42,29 +41,22 @@ public class HospitalService {
         return convertToDTO(hospitalCadastrado);
     }
 
-    public HospitalOutputDTO update(Integer idHospital, HospitalInputDTO hospitalInputDTO) {
-        HospitalEntity hospital = validateExist(idHospital);
+    public HospitalOutputDTO update(Integer idHospital, HospitalInputDTO hospitalInputDTO) throws EntityNotFound {
+        HospitalEntity hospital = getHospitalById(idHospital);
         hospital.setNome(hospitalInputDTO.getNome());
 
         hospitalRepository.save(hospital);
         return convertToDTO(hospital);
     }
 
-    public void deleteById(Integer idHospital) {
-        validateExist(idHospital);
-        hospitalRepository.deleteById(idHospital);
+    public void deleteById(Integer idHospital) throws EntityNotFound {
+        HospitalEntity hospital = getHospitalById(idHospital);
+        hospitalRepository.delete(hospital);
     }
 
-    private HospitalEntity validateExist(Integer idHospital) {
-        Optional<HospitalEntity> hospitalOptional = hospitalRepository.findById(idHospital);
-        validateExist(hospitalOptional);
-        return hospitalOptional.get();
-    }
-
-    private void validateExist(Optional<HospitalEntity> hospitalOptional) {
-        if (hospitalOptional.isEmpty()) {
-            throw new NegocioException("Hospital não existe");
-        }
+    protected HospitalEntity getHospitalById(Integer idHospital) throws EntityNotFound {
+        return hospitalRepository.findById(idHospital)
+                .orElseThrow(() -> new EntityNotFound("Hospital não encontrado"));
     }
 
     private HospitalEntity convertToEntity(HospitalInputDTO hospitalInputDTO) {
@@ -76,15 +68,15 @@ public class HospitalService {
     }
 
     private List<HospitalOutputDTO> convertListToDTO(List<HospitalEntity> hospitais) {
-        return objectMapper.convertValue(hospitais, List.class);
+        return hospitais.stream().map(this::convertToDTO).toList();
     }
 
-    public List<HospitalAtendimentoDTO> findHospitaisWithAllAtendimentos(Integer pagina, Integer quantidadeRegistros) {
+    public Page<HospitalAtendimentoDTO> findHospitaisWithAllAtendimentos(Integer pagina, Integer quantidadeRegistros) {
         Sort ordenacao = Sort.by("idHospital");
         Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
         Page<HospitalEntity> pacientesPaginados = hospitalRepository.findAll(pageable);
 
-        return pacientesPaginados.getContent().stream().map(this::convertToHospitalAtendimentosDTO).toList();
+        return pacientesPaginados.map(this::convertToHospitalAtendimentosDTO);
     }
 
     private HospitalAtendimentoDTO convertToHospitalAtendimentosDTO(HospitalEntity hospital){
