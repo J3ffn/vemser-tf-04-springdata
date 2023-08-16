@@ -55,7 +55,6 @@ public class PacienteService {
         pessoa.setCep(pacienteModificado.getPessoa().getCep());
         pessoa.setDataNascimento(pacienteModificado.getPessoa().getDataNascimento());
         pessoa.setCpf(pacienteModificado.getPessoa().getCpf());
-        pessoa.setSalarioMensal(pacienteModificado.getPessoa().getSalarioMensal());
         pessoa.setEmail(pacienteModificado.getPessoa().getEmail());
 
         pessoaRepository.save(paciente.getPessoa());
@@ -74,14 +73,15 @@ public class PacienteService {
     }
 
     private PessoaEntity convertInputToPessoa(PacienteInputDTO pacienteInput){
-        return new PessoaEntity(
-                pacienteInput.getNome(),
-                pacienteInput.getCep(),
-                pacienteInput.getDataNascimento(),
-                pacienteInput.getCpf(),
-                pacienteInput.getSalarioMensal(),
-                pacienteInput.getEmail()
-        );
+        PessoaEntity pessoa = new PessoaEntity();
+
+        pessoa.setNome(pacienteInput.getNome());
+        pessoa.setCep(pacienteInput.getCep());
+        pessoa.setDataNascimento(pacienteInput.getDataNascimento());
+        pessoa.setCpf(pacienteInput.getCpf());
+        pessoa.setEmail(pacienteInput.getEmail());
+
+        return pessoa;
     }
 
     private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput){
@@ -97,6 +97,7 @@ public class PacienteService {
 
     private PacienteOutputDTO convertPacienteToOutput(PacienteEntity paciente){
         PacienteOutputDTO pacienteOutput = objectMapper.convertValue(paciente, PacienteOutputDTO.class);
+        pacienteOutput.setIdHospital(paciente.getHospitalEntity().getIdHospital());
 
         PessoaEntity pessoa = paciente.getPessoa();
         pacienteOutput.setIdPessoa(pessoa.getIdPessoa());
@@ -104,7 +105,6 @@ public class PacienteService {
         pacienteOutput.setCep(pessoa.getCep());
         pacienteOutput.setDataNascimento(pessoa.getDataNascimento());
         pacienteOutput.setCpf(pessoa.getCpf());
-        pacienteOutput.setSalarioMensal(pessoa.getSalarioMensal());
         pacienteOutput.setEmail(pessoa.getEmail());
 
         return pacienteOutput;
