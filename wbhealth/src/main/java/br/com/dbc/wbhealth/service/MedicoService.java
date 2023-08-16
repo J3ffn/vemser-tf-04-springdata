@@ -88,16 +88,17 @@ public class MedicoService {
         MedicoEntity medico = new MedicoEntity();
         medico.setPessoa(pessoa);
         medico.setCrm(medicoInput.getCrm());
-        medico.setIdHospital(medicoInput.getIdHospital());
 
         HospitalOutputDTO hospitalOutput = hospitalService.findById(medicoInput.getIdHospital());
         HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
-        medico.setHospital(hospital);
+        medico.setHospitalEntity(hospital);
+
         return medico;
     }
 
     public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
         MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
+        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
 
         PessoaEntity pessoa = medico.getPessoa();
         medicoOutput.setNome(pessoa.getNome());

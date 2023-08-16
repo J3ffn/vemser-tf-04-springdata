@@ -97,6 +97,7 @@ public class PacienteService {
 
     private PacienteOutputDTO convertPacienteToOutput(PacienteEntity paciente){
         PacienteOutputDTO pacienteOutput = objectMapper.convertValue(paciente, PacienteOutputDTO.class);
+        pacienteOutput.setIdHospital(paciente.getHospitalEntity().getIdHospital());
 
         PessoaEntity pessoa = paciente.getPessoa();
         pacienteOutput.setIdPessoa(pessoa.getIdPessoa());
