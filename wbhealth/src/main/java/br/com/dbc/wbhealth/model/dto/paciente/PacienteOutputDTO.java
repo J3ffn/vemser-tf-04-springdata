@@ -28,9 +28,6 @@ public class PacienteOutputDTO {
     @Schema(description = "Número de CPF do paciente", example = "28283051040")
     private String cpf;
 
-    @Schema(description = "Salário mensal do paciente", example = "9000")
-    private Double salarioMensal;
-
     @Schema(description = "Email pessoal do paciente")
     private String email;
 }
