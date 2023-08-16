@@ -15,6 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
@@ -178,4 +181,11 @@ public class AtendimentoService {
         return atendimentoOutputDTO;
     }
 
+    public Page<AtendimentoOutputDTO> findAllPaginada(Pageable paginacao) {
+        return atendimentoRepository.findAll(paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+    }
+
+    public Page<AtendimentoOutputDTO> findAllPaginadaByData(LocalDate inicio, LocalDate fim, Pageable paginacao) {
+        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(inicio, fim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+    }
 }
