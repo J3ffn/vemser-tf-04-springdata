@@ -11,6 +11,10 @@ import br.com.dbc.wbhealth.repository.MedicoRepository;
 import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,8 +27,9 @@ public class MedicoService {
     private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
-    public List<MedicoOutputDTO> findAll(){
-        return medicoRepository.findAll().stream().map(this::converterMedicoOutput).toList();
+    public List<MedicoOutputDTO> findAll(Pageable pageable){
+        return medicoRepository.findAll(pageable)
+                .getContent().stream().map(this::converterMedicoOutput).toList();
     }
 
     public MedicoOutputDTO findById(Integer idMedico) throws EntityNotFound {

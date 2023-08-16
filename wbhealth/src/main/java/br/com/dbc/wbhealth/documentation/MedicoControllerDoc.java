@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 public interface MedicoControllerDoc {
@@ -23,7 +24,8 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping
-    ResponseEntity<List<MedicoOutputDTO>> findAll();
+    ResponseEntity<List<MedicoOutputDTO>> findAll(@RequestParam @PositiveOrZero Integer pagina,
+                                                  @RequestParam @Positive Integer quantidadeRegistros);
 
     @Operation(summary = "Retornar medico por id", description = "Retorna um DTO com os dados do medico cujo id corresponde ao id recebido por pathVariable.")
     @ApiResponses(
