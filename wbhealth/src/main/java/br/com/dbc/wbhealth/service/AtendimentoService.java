@@ -4,13 +4,11 @@ import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
-import br.com.dbc.wbhealth.model.entity.HospitalEntity;
-import br.com.dbc.wbhealth.model.entity.MedicoEntity;
-import br.com.dbc.wbhealth.model.entity.PacienteEntity;
+import br.com.dbc.wbhealth.model.entity.*;
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
+import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import lombok.RequiredArgsConstructor;
@@ -42,33 +40,19 @@ public class AtendimentoService {
 
     private final HospitalService hospitalService;
 
-    private void enviarEmails(AtendimentoInputDTO atendimento, TipoEmail tipo) throws MessagingException, BancoDeDadosException, EntityNotFound {
-//        Paciente paciente = objectMapper.convertValue(pacienteService.findById(atendimento.getIdPaciente()), Paciente.class);
-//        Medico medico = objectMapper.convertValue(medicoService.findById(atendimento.getIdMedico()), Medico.class);
-//
-//        emailService.sendEmailAtendimento(paciente, tipo);
-//        emailService.sendEmailAtendimento(medico, tipo);
+    private void enviarEmails(AtendimentoEntity atendimento, TipoEmail tipo) throws MessagingException, BancoDeDadosException, EntityNotFound {
+//        emailService.sendEmailAtendimento(atendimento, tipo);
 
-//        Paciente paciente = new Paciente();
-//        paciente.setEmail("sacwbhealth@gmail.com");
-//        paciente.setIdPaciente(1);
-//        paciente.setCpf("12345678901");
-//        paciente.setCep("58970000");
-//        paciente.setNome("Jeff");
-//        paciente.setDataNascimento(LocalDate.now());
-//        paciente.setIdPessoa(1);
-//        paciente.setSalarioMensal(800.0);
-//        emailService.sendEmailAtendimento(paciente, tipo);
     }
 
     private void verificarIdentificadores(AtendimentoInputDTO atendimentoDeEntrada) throws BancoDeDadosException, EntityNotFound {
-//        Integer idPaciente = atendimentoDeEntrada.getIdPaciente();
-//        Integer idHospital = atendimentoDeEntrada.getIdHospital();
-//        Integer idMedico = atendimentoDeEntrada.getIdMedico();
-//
-//        hospitalService.findById(idHospital);
-//        medicoService.findById(idMedico);
-//        pacienteService.findById(idPaciente);
+        Integer idPaciente = atendimentoDeEntrada.getIdPaciente();
+        Integer idHospital = atendimentoDeEntrada.getIdHospital();
+        Integer idMedico = atendimentoDeEntrada.getIdMedico();
+
+        hospitalService.findById(idHospital);
+        medicoService.findById(idMedico);
+        pacienteService.findById(idPaciente);
     }
 
     public AtendimentoOutputDTO save(AtendimentoInputDTO atendimentoNovo) throws BancoDeDadosException, EntityNotFound, MessagingException {
@@ -78,7 +62,7 @@ public class AtendimentoService {
 
         atendimento = atendimentoRepository.save(atendimento);
 
-        enviarEmails(atendimentoNovo, TipoEmail.CONFIRMACAO);
+        enviarEmails(atendimento, TipoEmail.CONFIRMACAO);
 
         AtendimentoOutputDTO atendimentoOutputDTO = setFKInAtendimentoDTO(objectMapper.convertValue(atendimento, AtendimentoOutputDTO.class), atendimento);
 
@@ -116,20 +100,20 @@ public class AtendimentoService {
 
         atendimentoConvertido = atendimentoRepository.save(atendimentoConvertido);
 
-        enviarEmails(atendimentoAtualizado, TipoEmail.ATUALIZACAO);
+        enviarEmails(atendimentoConvertido, TipoEmail.ATUALIZACAO);
 
         AtendimentoOutputDTO atendimentoOutputDTO = this.setFKInAtendimentoDTO(objectMapper.convertValue(atendimentoAtualizado, AtendimentoOutputDTO.class), atendimentoConvertido);
 
         return atendimentoOutputDTO;
     }
 
-    public void deletarPeloId(Integer id) throws EntityNotFound {
+    public void deletarPeloId(Integer idAtendimento) throws EntityNotFound {
         try {
-            AtendimentoInputDTO atendimento = objectMapper.convertValue(findById(id), AtendimentoInputDTO.class);
+            AtendimentoInputDTO atendimento = objectMapper.convertValue(findById(idAtendimento), AtendimentoInputDTO.class);
 
-            atendimentoRepository.deleteById(id);
+            atendimentoRepository.deleteById(idAtendimento);
 
-            enviarEmails(atendimento, TipoEmail.CANCELAMENTO);
+            enviarEmails(atendimentoRepository.getById(idAtendimento), TipoEmail.CANCELAMENTO);
 
         } catch (BancoDeDadosException | MessagingException e) {
             throw new RuntimeException(e);

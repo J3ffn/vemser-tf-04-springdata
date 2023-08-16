@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -58,9 +59,10 @@ public class AtendimentoController implements AtendimentoControllerDoc {
 
     @GetMapping("/paginado/data")
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                            @RequestParam String dataInicio, @RequestParam String dataFinal) {
+                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") LocalDate dataInicio,
+                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd")  LocalDate dataFinal) {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(LocalDate.parse(dataInicio), LocalDate.parse(dataFinal), paginacao));
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, paginacao));
     }
 
     @PostMapping

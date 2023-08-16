@@ -1,12 +1,8 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.model.dto.relatorio.RelatorioLucro;
-import br.com.dbc.wbhealth.model.dto.relatorio.RelatorioOutput;
-import br.com.dbc.wbhealth.service.AtendimentoService;
 import br.com.dbc.wbhealth.service.AtendimentoServiceRelatorio;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.apache.tomcat.jni.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,15 +24,17 @@ public class RelatorioController {
     private final AtendimentoServiceRelatorio atendimentoService;
 
     @GetMapping("/lucro")
-    public ResponseEntity<Page<RelatorioLucro>> relatorioLucro(@RequestParam Integer pagina, @RequestParam Integer quantidade) {
+    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroAteOMomento(@RequestParam Integer pagina, @RequestParam Integer quantidade) {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findLucro(paginacao));
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findLucroAteAgora(paginacao));
     }
 
     @GetMapping("/lucro/data")
-    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(@RequestParam Integer pagina, @RequestParam Integer quantidade, @RequestParam String dataInicio, @RequestParam String dataFim) {
+    public ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
+                                                                      @RequestParam String dataInicio,
+                                                                      @RequestParam String dataFim) {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.getLucroByData(LocalDate.parse(dataInicio), LocalDate.parse( dataFim), paginacao));
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.getLucroByData(LocalDate.parse(dataInicio), LocalDate.parse(dataFim), paginacao));
     }
 
 }

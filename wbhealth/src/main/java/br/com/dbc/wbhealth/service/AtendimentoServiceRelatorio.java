@@ -16,12 +16,11 @@ public class AtendimentoServiceRelatorio {
 
     private final AtendimentoRepository atendimentoRepository;
 
-
     public Page<RelatorioLucro> getLucroByData(LocalDate inicio, LocalDate fim, Pageable paginacao) {
         return atendimentoRepository.getLucroByData(inicio, fim, paginacao);
     }
 
-    public Page<RelatorioLucro> findLucro(Pageable paginacao) {
-
+    public Page<RelatorioLucro> findLucroAteAgora(Pageable paginacao) {
+        return atendimentoRepository.getLucroAteOMomento(LocalDate.now(), paginacao);
     }
 }
