@@ -9,15 +9,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 public interface AtendimentoControllerDoc {
@@ -31,8 +29,8 @@ public interface AtendimentoControllerDoc {
             }
     )
     @GetMapping
-    ResponseEntity<List<AtendimentoOutputDTO>> findAll() throws BancoDeDadosException;
-
+    ResponseEntity<List<AtendimentoOutputDTO>>
+    findAll() throws BancoDeDadosException;
 
     @Operation(summary = "Buscar atendimento pelo ID.", description = "Busca um atendimento pelo seu ID.")
     @ApiResponses(
@@ -45,7 +43,10 @@ public interface AtendimentoControllerDoc {
             }
     )
     @GetMapping("/{idAtendimento}")
-    ResponseEntity<AtendimentoOutputDTO> buscarAtendimentoPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws BancoDeDadosException, EntityNotFound;
+    ResponseEntity<AtendimentoOutputDTO>
+    buscarAtendimentoPeloId(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento
+    ) throws BancoDeDadosException, EntityNotFound;
 
     @Operation(summary = "Buscar atendimentos de um usuário.", description = "Busca um atendimento pelo ID de um paciente.")
     @ApiResponses(
@@ -58,7 +59,10 @@ public interface AtendimentoControllerDoc {
             }
     )
     @GetMapping("/paciente/{idPaciente}")
-    ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws BancoDeDadosException;
+    ResponseEntity<List<AtendimentoOutputDTO>>
+    bucarAtendimentoPeloIdUsuario(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente
+    ) throws BancoDeDadosException;
 
     @Operation(summary = "Buscar atendimentos paginados.", description = "Busca todos os atendimentos registrados, porém, paginado.")
     @ApiResponses(
@@ -71,7 +75,11 @@ public interface AtendimentoControllerDoc {
             }
     )
     @GetMapping("/paginado")
-    ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(@RequestParam Integer pagina, @RequestParam Integer quantidade);
+    ResponseEntity<Page<AtendimentoOutputDTO>>
+    findAllPaginada(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    );
 
     @Operation(summary = "Buscar atendimentos paginados entre datas.", description = "Busca todos os atendimentos registrados entre as datas passadas, porém, paginado.")
     @ApiResponses(
@@ -84,9 +92,13 @@ public interface AtendimentoControllerDoc {
             }
     )
     @GetMapping("/paginado/data")
-    ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                            @RequestParam String dataInicio,
-                                                                            @RequestParam String dataFinal) throws DataInvalidaException;
+    ResponseEntity<Page<AtendimentoOutputDTO>>
+    findAllPaginadaByData(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros,
+            @RequestParam String dataInicio,
+            @RequestParam String dataFinal
+    ) throws DataInvalidaException;
 
     @Operation(summary = "Adicionar atendimento.", description = "Adiciona um atendimento ao banco de dados.")
     @ApiResponses(
@@ -98,7 +110,8 @@ public interface AtendimentoControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
+    ResponseEntity<AtendimentoOutputDTO>
+    save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
     @Operation(summary = "Alterar informações de um atendimento.", description = "Altera informações de um atendimento com o id passado.")
     @ApiResponses(
@@ -111,8 +124,11 @@ public interface AtendimentoControllerDoc {
             }
     )
     @PutMapping("/{idAtendimento}")
-    ResponseEntity<AtendimentoOutputDTO> alterarPeloId(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
-                                                       @Valid @RequestBody AtendimentoInputDTO atendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
+    ResponseEntity<AtendimentoOutputDTO>
+    alterarPeloId(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento,
+            @Valid @RequestBody AtendimentoInputDTO atendimento
+    ) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
     @Operation(summary = "Deletar um atendimento.", description = "Deleta um atendimento do banco de dados pelo seu ID.")
     @ApiResponses(
@@ -125,6 +141,8 @@ public interface AtendimentoControllerDoc {
             }
     )
     @DeleteMapping("/{idAtendimento}")
-    ResponseEntity<Void> deletarAtendimento(@Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento) throws EntityNotFound;
+    ResponseEntity<Void> deletarAtendimento(
+            @Positive(message = "Deve ser positivo") @PathVariable Integer idAtendimento
+    ) throws EntityNotFound;
 
 }
