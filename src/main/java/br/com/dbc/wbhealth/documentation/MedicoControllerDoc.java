@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
@@ -51,7 +52,7 @@ public interface MedicoControllerDoc {
             }
     )
     @PostMapping()
-    ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO);
+    ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) throws BancoDeDadosException;
 
 
     @Operation(summary = "Atualizar medico", description = "Atualiza o medico correspondente ao id passado via pathVariable com os dados passados pelo InputDTO e salva no sistema")

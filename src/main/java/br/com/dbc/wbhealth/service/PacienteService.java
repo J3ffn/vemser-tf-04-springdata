@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.service;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
@@ -51,8 +52,12 @@ public class PacienteService {
         return convertPacienteToOutput(pacienteEncontrado);
     }
 
-    public PacienteOutputDTO save(PacienteInputDTO pacienteInput){
+    public PacienteOutputDTO save(PacienteInputDTO pacienteInput) throws BancoDeDadosException {
         PessoaEntity pessoa = convertInputToPessoa(pacienteInput);
+
+        if (pessoaRepository.existsByCpf(pessoa.getCpf())) {
+            throw new BancoDeDadosException("CPF já cadastrado.");
+        }
         PessoaEntity pessoaCriada = pessoaRepository.save(pessoa);
 
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);

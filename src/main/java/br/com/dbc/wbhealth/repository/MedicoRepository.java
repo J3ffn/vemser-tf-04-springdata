@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MedicoRepository extends JpaRepository<MedicoEntity, Integer> {
+    Boolean existsByCrm(String crm);
 }
