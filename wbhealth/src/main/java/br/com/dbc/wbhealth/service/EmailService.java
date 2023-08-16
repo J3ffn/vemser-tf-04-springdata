@@ -53,34 +53,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(emailTemplate, true);
         PessoaEntity paciente = atendimento.getPacienteEntity().getPessoa();
 
-        this.enviarParaMedico(helper, atendimento.getMedicoEntity().getPessoa(), tipoEmail, atendimento);
-        this.enviatParaPaciente(helper, atendimento.getPacienteEntity().getPessoa(), tipoEmail, atendimento);
-
-        try {
-            helper.setFrom(from);
-            helper.setTo(paciente.getEmail());
-            helper.setSubject(tipoEmail.getTitulo());
-            helper.setText(getContentFromTemplate(paciente, tipoEmail, atendimento), true);
-
-            mailSender.send(helper.getMimeMessage());
-
-        } catch (IOException | TemplateException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void enviarParaMedico(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail, AtendimentoEntity atendimento) {
-        try {
-            helper.setFrom(from);
-            helper.setTo(pessoa.getEmail());
-            helper.setSubject(tipoEmail.getTitulo());
-            helper.setText(getContentFromTemplate(pessoa, tipoEmail, atendimento), true);
-
-            mailSender.send(helper.getMimeMessage());
-
-        } catch (IOException | TemplateException | MessagingException e) {
-            e.printStackTrace();
-        }
+        this.enviatParaPaciente(helper, paciente, tipoEmail, atendimento);
     }
 
     private void enviatParaPaciente(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail, AtendimentoEntity atendimento) {
@@ -104,7 +77,7 @@ public class EmailService {
         dados.put("id", paciente.getIdPessoa().toString());
         dados.put("emailSuporte", emailSuporte);
 
-        dados.put("tipo", tipoEmail.name());
+        dados.put("tipo", atendimento.getTipoDeAtendimento());
         dados.put("data", atendimento.getDataAtendimento());
         dados.put("laudo", atendimento.getLaudo());
         dados.put("medico", paciente.getNome());
@@ -113,16 +86,24 @@ public class EmailService {
         StringBuilder estruturaDaMensagem = new StringBuilder();
 
         switch (tipoEmail) {
-            case CONFIRMACAO -> { estruturaTemplate = "";
+            case CONFIRMACAO -> {
+                estruturaTemplate = "email-templateHtmlConfirmacao.ftl";
                 estruturaDaMensagem.append("Seu atendimento foi confirmado!");
             }
-            case ATUALIZACAO -> estruturaDaMensagem.append("Seu atendimento foi atulizado!");
-            case CANCELAMENTO -> estruturaDaMensagem.append("Seu atendimento foi desmarcado!");
+            case ATUALIZACAO -> {
+                estruturaTemplate = "email-templateHtmlAtualizacao.ftl";
+                estruturaDaMensagem.append("Seu atendimento foi atulizado!");
+            }
+            case CANCELAMENTO -> {
+                estruturaTemplate = "email-templateHtmlCancelamento.ftl";
+                estruturaDaMensagem.append("Seu atendimento foi desmarcado!");
+            }
         }
 
         dados.put("mensagem", estruturaDaMensagem.toString());
 
         Template template = fmConfiguration.getTemplate(estruturaTemplate);
+
         String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, dados);
 
         return html;

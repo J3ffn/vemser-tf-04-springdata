@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TESTE</title>
+    <title>WBHEALTH</title>
     <style>
         p {
             font-size: 1.313rem;
@@ -79,7 +79,7 @@
 </head>
 
 <body>
-<div style="display: block; width: 40%; margin: 0px; padding: 0px;">
+<div style="display: block; width: 600px; margin: 0px; padding: 0px;">
 
     <div style="display: block; background-color: rgba(217, 217, 217, 0.2); margin-top: 10px; margin: 40px; border-radius: 16px; padding: 10px 0 40px 0px;">
 
@@ -89,8 +89,8 @@
 
         <div style="margin-left: 40px;">
             <p>Olá, ${nome}.<br><br>
-                Seu atendimento foi confirmado com sucesso!<br>
-                Informações sobre o atendimento:</p>
+                Seu atendimento foi atualizado com sucesso!<br>
+                Novas informações sobre o atendimento:</p>
         </div>
 
         <div style="border-radius: 17px; background-color: rgba(217, 217, 217, 0.53); margin: 10px 3% 10px 3%; padding: 10px 0px 10px 0px;">

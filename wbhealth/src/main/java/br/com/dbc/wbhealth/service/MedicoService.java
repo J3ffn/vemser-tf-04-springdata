@@ -46,6 +46,7 @@ public class MedicoService {
     public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO){
 
         PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
+
         PessoaEntity pessoaSave = pessoaRepository.save(pessoaEntity);
 
         MedicoEntity medico = convertInputToMedico(pessoaSave, medicoInputDTO);
