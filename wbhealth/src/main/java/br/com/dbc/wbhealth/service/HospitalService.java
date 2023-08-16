@@ -26,10 +26,7 @@ public class HospitalService {
     }
 
     public HospitalOutputDTO findById(Integer idHospital) {
-//        HospitalEntity hospital = hospitalRepository.getById(idHospital);
-
-        //        return convertToDTO(hospital);
-        return objectMapper.convertValue(hospitalRepository.getById(idHospital), HospitalOutputDTO.class);
+        return convertToDTO(hospitalRepository.getById(idHospital));
     }
 
     public HospitalOutputDTO save(HospitalInputDTO hospitalInputDTO) {
