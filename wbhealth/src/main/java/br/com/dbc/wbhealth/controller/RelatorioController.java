@@ -1,5 +1,7 @@
 package br.com.dbc.wbhealth.controller;
 
+import br.com.dbc.wbhealth.documentation.RelatorioControllerDoc;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.model.dto.relatorio.RelatorioLucro;
 import br.com.dbc.wbhealth.service.AtendimentoServiceRelatorio;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/relatorio")
-public class RelatorioController {
+public class RelatorioController implements RelatorioControllerDoc {
 
     private final AtendimentoServiceRelatorio atendimentoService;
 
@@ -31,10 +33,9 @@ public class RelatorioController {
 
     @GetMapping("/lucro/data")
     public ResponseEntity<Page<RelatorioLucro>> relatorioLucroPorData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                      @RequestParam String dataInicio,
-                                                                      @RequestParam String dataFim) {
+                                                                      @RequestParam String dataInicio) throws DataInvalidaException {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.getLucroByData(LocalDate.parse(dataInicio), LocalDate.parse(dataFim), paginacao));
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.getLucroByData(dataInicio, paginacao));
     }
 
 }

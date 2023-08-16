@@ -1,27 +1,25 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.*;
+import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
-import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.template.Configuration;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -41,7 +39,7 @@ public class AtendimentoService {
     private final HospitalService hospitalService;
 
     private void enviarEmails(AtendimentoEntity atendimento, TipoEmail tipo) throws MessagingException, BancoDeDadosException, EntityNotFound {
-//        emailService.sendEmailAtendimento(atendimento, tipo);
+        emailService.sendEmailAtendimento(atendimento, tipo);
 
     }
 
@@ -169,7 +167,15 @@ public class AtendimentoService {
         return atendimentoRepository.findAll(paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 
-    public Page<AtendimentoOutputDTO> findAllPaginadaByData(LocalDate inicio, LocalDate fim, Pageable paginacao) {
-        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(inicio, fim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+    public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio, String fim, Pageable paginacao) throws DataInvalidaException {
+        LocalDate dataInicio;
+        LocalDate dataFim;
+        try {
+            dataInicio = LocalDate.parse(inicio);
+            dataFim = LocalDate.parse(fim);
+        } catch (Exception e) {
+            throw new DataInvalidaException("Data inválida!");
+        }
+        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 }

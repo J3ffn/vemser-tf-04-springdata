@@ -2,22 +2,16 @@ package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.AtendimentoControllerDoc;
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import br.com.dbc.wbhealth.service.AtendimentoService;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.jni.Local;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.time.LocalDate;
 import java.util.List;
 
 @Validated
@@ -59,8 +52,8 @@ public class AtendimentoController implements AtendimentoControllerDoc {
 
     @GetMapping("/paginado/data")
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") LocalDate dataInicio,
-                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd")  LocalDate dataFinal) {
+                                                                            @RequestParam String dataInicio,
+                                                                            @RequestParam String dataFinal) throws DataInvalidaException {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, paginacao));
     }
