@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
@@ -7,13 +8,13 @@ import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.List;
 
 public interface PacienteControllerDoc {
     @Operation(
@@ -28,8 +29,9 @@ public interface PacienteControllerDoc {
             }
     )
     @GetMapping
-    List<PacienteOutputDTO> findAll(@RequestParam @PositiveOrZero Integer pagina,
-                                    @RequestParam @Positive Integer quantidadeRegistros);
+    ResponseEntity<Page<PacienteOutputDTO>>
+    findAll(@RequestParam @PositiveOrZero Integer pagina,
+            @RequestParam @Positive Integer quantidadeRegistros);
 
 
     @Operation(
@@ -46,8 +48,11 @@ public interface PacienteControllerDoc {
             }
     )
     @GetMapping("/atendimentos")
-    List<PacienteAtendimentosOutputDTO> findAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
-                                                            @RequestParam @Positive Integer quantidadeRegistros);
+    ResponseEntity<Page<PacienteAtendimentosOutputDTO>>
+    findAllAtendimentos(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    );
 
 
     @Operation(
@@ -64,8 +69,8 @@ public interface PacienteControllerDoc {
             }
     )
     @GetMapping("/by-id")
-    ResponseEntity<PacienteOutputDTO> findById(@RequestParam("idPaciente") @Positive Integer idPaciente)
-            throws EntityNotFound;
+    ResponseEntity<PacienteOutputDTO>
+    findById(@RequestParam("idPaciente") @Positive Integer idPaciente) throws EntityNotFound;
 
 
     @Operation(
@@ -82,7 +87,8 @@ public interface PacienteControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente);
+    ResponseEntity<PacienteOutputDTO>
+    save(@RequestBody @Valid PacienteInputDTO paciente) throws BancoDeDadosException, EntityNotFound;
 
 
     @Operation(
@@ -99,9 +105,9 @@ public interface PacienteControllerDoc {
             }
     )
     @PutMapping("/{idPaciente}")
-    ResponseEntity<PacienteOutputDTO> update(@PathVariable @Positive Integer idPaciente,
-                                             @RequestBody @Valid PacienteInputDTO paciente)
-            throws EntityNotFound;
+    ResponseEntity<PacienteOutputDTO>
+    update(@PathVariable @Positive Integer idPaciente,
+           @RequestBody @Valid PacienteInputDTO paciente) throws EntityNotFound;
 
 
     @Operation(
@@ -118,5 +124,6 @@ public interface PacienteControllerDoc {
             }
     )
     @DeleteMapping("/{idPaciente}")
-    ResponseEntity<Void> delete(@PathVariable @Positive Integer idPaciente) throws EntityNotFound;
+    ResponseEntity<Void>
+    delete(@PathVariable @Positive Integer idPaciente) throws EntityNotFound;
 }

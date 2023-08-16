@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
@@ -7,6 +8,7 @@ import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +29,11 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping
-    ResponseEntity<List<MedicoOutputDTO>> findAll(@RequestParam @PositiveOrZero Integer pagina,
-                                                  @RequestParam @Positive Integer quantidadeRegistros);
+    ResponseEntity<Page<MedicoOutputDTO>>
+    findAll(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    );
 
     @Operation(summary = "Retornar medico por id", description = "Retorna um DTO com os dados do medico cujo id corresponde ao id recebido por pathVariable.")
     @ApiResponses(
@@ -40,7 +45,8 @@ public interface MedicoControllerDoc {
     )
 
     @GetMapping("/{idMedico}")
-    ResponseEntity<MedicoOutputDTO> findById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
+    ResponseEntity<MedicoOutputDTO>
+    findById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
 
     @Operation(summary = "Criar medico", description = "Cria um medico com os dados passados através do InputDTO, cria um id e salva no sistema")
     @ApiResponses(
@@ -51,7 +57,8 @@ public interface MedicoControllerDoc {
             }
     )
     @PostMapping()
-    ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO);
+    ResponseEntity<MedicoOutputDTO>
+    save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound;
 
 
     @Operation(summary = "Atualizar medico", description = "Atualiza o medico correspondente ao id passado via pathVariable com os dados passados pelo InputDTO e salva no sistema")
@@ -63,8 +70,9 @@ public interface MedicoControllerDoc {
             }
     )
     @PutMapping("/{idMedico}")
-    ResponseEntity<MedicoOutputDTO> update(@PathVariable @Positive Integer idMedico,
-                                           @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound;
+    ResponseEntity<MedicoOutputDTO>
+    update(@PathVariable @Positive Integer idMedico,
+           @Valid @RequestBody MedicoInputDTO medicoInputDTO) throws EntityNotFound;
 
     @Operation(summary = "Deletar medico", description = "Exclui o médico com id correspondente ao id passado por pathVariable")
     @ApiResponses(
@@ -75,7 +83,8 @@ public interface MedicoControllerDoc {
             }
     )
     @DeleteMapping("/{idMedico}")
-    ResponseEntity<Void> deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
+    ResponseEntity<Void>
+    deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
 
     @Operation(summary = "Retorna um relatório com a quantidade de atendimentos no período",
             description = "Retorna um relatório com a quantidade de atendimentos no período")
@@ -87,8 +96,10 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping("/{medicoId}/atendimentos")
-    public ResponseEntity<List<MedicoAtendimentoDTO>> generateMedicoAtendimento(
+    ResponseEntity<List<MedicoAtendimentoDTO>>
+    generateMedicoAtendimento(
             @PathVariable Integer medicoId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataInicio,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataFim) throws EntityNotFound;
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataFim
+    ) throws EntityNotFound;
 }

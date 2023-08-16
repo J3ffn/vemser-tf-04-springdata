@@ -1,15 +1,14 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.MedicoControllerDoc;
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
 import br.com.dbc.wbhealth.service.MedicoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,14 +30,10 @@ public class MedicoController implements MedicoControllerDoc {
     private final MedicoService medicoService;
 
     @GetMapping
-    public ResponseEntity<List<MedicoOutputDTO>> findAll(
+    public ResponseEntity<Page<MedicoOutputDTO>> findAll(
             @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
             @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) {
-
-        Sort ordenacao = Sort.by("idMedico");
-        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
-
-        return new ResponseEntity<>(medicoService.findAll(pageable), HttpStatus.OK);
+        return new ResponseEntity<>(medicoService.findAll(pagina, quantidadeRegistros), HttpStatus.OK);
     }
 
     @GetMapping("/{idMedico}")
@@ -48,7 +43,8 @@ public class MedicoController implements MedicoControllerDoc {
     }
 
     @PostMapping()
-    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) {
+    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO)
+            throws BancoDeDadosException, EntityNotFound {
         MedicoOutputDTO medicoCriado = medicoService.save(medicoInputDTO);
         return new ResponseEntity<>(medicoCriado, HttpStatus.OK);
     }

@@ -1,12 +1,14 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.PacienteControllerDoc;
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import br.com.dbc.wbhealth.service.PacienteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.List;
 
 @Validated
 @RestController
@@ -26,16 +27,21 @@ public class PacienteController implements PacienteControllerDoc {
 
     @Override
     @GetMapping
-    public List<PacienteOutputDTO> findAll(@RequestParam @PositiveOrZero Integer pagina,
-                                           @RequestParam @Positive Integer quantidadeRegistros) {
-        return pacienteService.findAll(pagina, quantidadeRegistros);
+    public ResponseEntity<Page<PacienteOutputDTO>> findAll(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) {
+        Page<PacienteOutputDTO> pacientesPaginados = pacienteService.findAll(pagina, quantidadeRegistros);
+        return new ResponseEntity<>(pacientesPaginados, HttpStatus.OK);
     }
 
     @Override
     @GetMapping("/atendimentos")
-    public List<PacienteAtendimentosOutputDTO> findAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
-                                                                   @RequestParam @Positive Integer quantidadeRegistros){
-        return pacienteService.findAllAtendimentos(pagina, quantidadeRegistros);
+    public ResponseEntity<Page<PacienteAtendimentosOutputDTO>> findAllAtendimentos(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros){
+        Page<PacienteAtendimentosOutputDTO> pacienteAtendimentosPaginados =
+                pacienteService.findAllAtendimentos(pagina, quantidadeRegistros);
+        return new ResponseEntity<>(pacienteAtendimentosPaginados, HttpStatus.OK);
     }
 
     @Override
@@ -48,7 +54,8 @@ public class PacienteController implements PacienteControllerDoc {
 
     @Override
     @PostMapping
-    public ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente) {
+    public ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente)
+            throws BancoDeDadosException, EntityNotFound {
         PacienteOutputDTO pacienteCriado = pacienteService.save(paciente);
         return new ResponseEntity<>(pacienteCriado, HttpStatus.OK);
     }

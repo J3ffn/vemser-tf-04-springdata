@@ -9,8 +9,6 @@ import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.service.AtendimentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Validated
@@ -45,17 +44,23 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     }
 
     @GetMapping("/paginado")
-    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(@RequestParam Integer pagina, @RequestParam Integer quantidade) {
-        Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginada(paginacao));
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros
+    ){
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(atendimentoService.findAllPaginada(pagina, quantidadeRegistros));
     }
 
     @GetMapping("/paginado/data")
-    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                            @RequestParam String dataInicio,
-                                                                            @RequestParam String dataFinal) throws DataInvalidaException {
-        Pageable paginacao = PageRequest.of(pagina, quantidade);
-        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, paginacao));
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros,
+            @RequestParam String dataInicio,
+            @RequestParam String dataFinal
+    ) throws DataInvalidaException {
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService
+                .findAllPaginadaByData(dataInicio, dataFinal, pagina, quantidadeRegistros));
     }
 
     @PostMapping
