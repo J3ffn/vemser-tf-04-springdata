@@ -1,9 +1,12 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
+import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
@@ -11,6 +14,10 @@ import br.com.dbc.wbhealth.repository.PacienteRepository;
 import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,8 +30,20 @@ public class PacienteService {
     private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
-    public List<PacienteOutputDTO> findAll(){
-        return pacienteRepository.findAll().stream().map(this::convertPacienteToOutput).toList();
+    public List<PacienteOutputDTO> findAll(Integer pagina, Integer quantidadeRegistros){
+        Sort ordenacao = Sort.by("idPaciente");
+        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+        Page<PacienteEntity> pacientesPaginados = pacienteRepository.findAll(pageable);
+
+        return pacientesPaginados.getContent().stream().map(this::convertPacienteToOutput).toList();
+    }
+
+    public List<PacienteAtendimentosOutputDTO> findAllAtendimentos(Integer pagina, Integer quantidadeRegistros) {
+        Sort ordenacao = Sort.by("idPaciente");
+        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+        Page<PacienteEntity> pacientesPaginados = pacienteRepository.findAll(pageable);
+
+        return pacientesPaginados.getContent().stream().map(this::convertToPacienteAtendimentosOutput).toList();
     }
 
     public PacienteOutputDTO findById(Integer idPaciente) throws EntityNotFound {
@@ -55,7 +74,6 @@ public class PacienteService {
         pessoa.setCep(pacienteModificado.getPessoa().getCep());
         pessoa.setDataNascimento(pacienteModificado.getPessoa().getDataNascimento());
         pessoa.setCpf(pacienteModificado.getPessoa().getCpf());
-        pessoa.setSalarioMensal(pacienteModificado.getPessoa().getSalarioMensal());
         pessoa.setEmail(pacienteModificado.getPessoa().getEmail());
 
         pessoaRepository.save(paciente.getPessoa());
@@ -74,14 +92,15 @@ public class PacienteService {
     }
 
     private PessoaEntity convertInputToPessoa(PacienteInputDTO pacienteInput){
-        return new PessoaEntity(
-                pacienteInput.getNome(),
-                pacienteInput.getCep(),
-                pacienteInput.getDataNascimento(),
-                pacienteInput.getCpf(),
-                pacienteInput.getSalarioMensal(),
-                pacienteInput.getEmail()
-        );
+        PessoaEntity pessoa = new PessoaEntity();
+
+        pessoa.setNome(pacienteInput.getNome());
+        pessoa.setCep(pacienteInput.getCep());
+        pessoa.setDataNascimento(pacienteInput.getDataNascimento());
+        pessoa.setCpf(pacienteInput.getCpf());
+        pessoa.setEmail(pacienteInput.getEmail());
+
+        return pessoa;
     }
 
     private PacienteEntity convertInputToPaciente(PessoaEntity pessoa, PacienteInputDTO pacienteInput){
@@ -105,9 +124,35 @@ public class PacienteService {
         pacienteOutput.setCep(pessoa.getCep());
         pacienteOutput.setDataNascimento(pessoa.getDataNascimento());
         pacienteOutput.setCpf(pessoa.getCpf());
-        pacienteOutput.setSalarioMensal(pessoa.getSalarioMensal());
         pacienteOutput.setEmail(pessoa.getEmail());
 
         return pacienteOutput;
+    }
+
+    private PacienteAtendimentosOutputDTO convertToPacienteAtendimentosOutput(PacienteEntity paciente){
+        PacienteAtendimentosOutputDTO pacienteAtendimentosOutput = new PacienteAtendimentosOutputDTO();
+
+        pacienteAtendimentosOutput.setIdPaciente(paciente.getIdPaciente());
+        pacienteAtendimentosOutput.setNome(paciente.getPessoa().getNome());
+
+        List<AtendimentoOutputDTO> atendimentosOutput = paciente.getAtendimentos().stream()
+                .map(this::convertAtendimentoToOutput).toList();
+        pacienteAtendimentosOutput.setAtendimentos(atendimentosOutput);
+
+        return pacienteAtendimentosOutput;
+    }
+
+    private AtendimentoOutputDTO convertAtendimentoToOutput(AtendimentoEntity atendimento) {
+        AtendimentoOutputDTO atendimentoOutputDTO = new AtendimentoOutputDTO();
+        atendimentoOutputDTO.setIdAtendimento(atendimento.getIdAtendimento());
+        atendimentoOutputDTO.setIdHospital(atendimento.getHospitalEntity().getIdHospital());
+        atendimentoOutputDTO.setIdPaciente(atendimento.getPacienteEntity().getIdPaciente());
+        atendimentoOutputDTO.setIdMedico(atendimento.getMedicoEntity().getIdMedico());
+        atendimentoOutputDTO.setLaudo(atendimento.getLaudo());
+        atendimentoOutputDTO.setValorDoAtendimento(atendimento.getValorDoAtendimento());
+        atendimentoOutputDTO.setTipoDeAtendimento(atendimento.getTipoDeAtendimento().name());
+        atendimentoOutputDTO.setDataAtendimento(atendimento.getDataAtendimento());
+
+        return atendimentoOutputDTO;
     }
 }
