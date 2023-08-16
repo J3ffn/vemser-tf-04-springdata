@@ -26,6 +26,7 @@ public class HospitalService {
     }
 
     public HospitalOutputDTO findById(Integer idHospital) {
+        validateExist(idHospital);
         return convertToDTO(hospitalRepository.getById(idHospital));
     }
 
@@ -49,13 +50,13 @@ public class HospitalService {
     }
 
     private HospitalEntity validateExist(Integer idHospital) {
-        HospitalEntity hospital = hospitalRepository.getById(idHospital);
-        validateExist(hospital);
-        return hospital;
+        Optional<HospitalEntity> hospitalOptional = hospitalRepository.findById(idHospital);
+        validateExist(hospitalOptional);
+        return hospitalOptional.get();
     }
 
-    private void validateExist(HospitalEntity hospital) {
-        if (ObjectUtils.isEmpty(hospital)) {
+    private void validateExist(Optional<HospitalEntity> hospitalOptional) {
+        if (hospitalOptional.isEmpty()) {
             throw new NegocioException("Hospital não existe");
         }
     }
