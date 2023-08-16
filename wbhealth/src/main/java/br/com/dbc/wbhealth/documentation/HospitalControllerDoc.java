@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalInputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 public interface HospitalControllerDoc {
@@ -36,6 +38,23 @@ public interface HospitalControllerDoc {
     )
     @GetMapping("/{idHospital}")
     public ResponseEntity<HospitalOutputDTO> findById(@Positive @PathVariable Integer idHospital);
+
+    @Operation(
+            summary = "Listar Hospitais com Atendimentos",
+            description = "Lista todos os hospitais com todos os atendimentos forma paginada"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível buscar o hospital"),
+                    @ApiResponse(responseCode = "404", description = "HOspital não encontrado"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            }
+    )
+    @GetMapping("/atendimentos")
+    List<HospitalAtendimentoDTO> findHospitaisWithAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
+                                                     @RequestParam @Positive Integer quantidadeRegistros);
 
     @Operation(summary = "Adicionar hospital", description = "Cria hospital com o dado repassado pela requisicao")
     @ApiResponses(

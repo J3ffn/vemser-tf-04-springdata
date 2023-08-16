@@ -1,6 +1,7 @@
 package br.com.dbc.wbhealth.documentation;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,12 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 public interface PacienteControllerDoc {
     @Operation(
             summary = "Listar pacientes",
-            description = "Lista todos os pacientes cadastrados no sistema"
+            description = "Lista todos os pacientes cadastrados no sistema de forma paginada"
     )
     @ApiResponses(
             value = {
@@ -26,7 +28,26 @@ public interface PacienteControllerDoc {
             }
     )
     @GetMapping
-    List<PacienteOutputDTO> findAll();
+    List<PacienteOutputDTO> findAll(@RequestParam @PositiveOrZero Integer pagina,
+                                    @RequestParam @Positive Integer quantidadeRegistros);
+
+
+    @Operation(
+            summary = "Listar atendimentos dos pacientes",
+            description = "Lista os atendimentos de todos os pacientes de forma paginada"
+    )
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna os atendimentos dos pacientes"),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível buscar o paciente"),
+                    @ApiResponse(responseCode = "404", description = "Paciente não encontrado"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            }
+    )
+    @GetMapping("/atendimentos")
+    List<PacienteAtendimentosOutputDTO> findAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
+                                                            @RequestParam @Positive Integer quantidadeRegistros);
 
 
     @Operation(
