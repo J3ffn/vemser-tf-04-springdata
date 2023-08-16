@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.service;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
@@ -40,9 +41,15 @@ public class MedicoService {
         return converterMedicoOutput(medicoEncontrado);
     }
 
-    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO){
+    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO) throws BancoDeDadosException {
 
         PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
+        if (pessoaRepository.existsByCpf(pessoaEntity.getCpf())) {
+            throw new BancoDeDadosException("CPF já cadastrado.");
+        }
+        if (medicoRepository.existsByCrm(medicoInputDTO.getCrm())) {
+            throw new BancoDeDadosException("CRM já cadastrado.");
+        }
 
         PessoaEntity pessoaSave = pessoaRepository.save(pessoaEntity);
 

@@ -1,5 +1,6 @@
 package br.com.dbc.wbhealth.documentation;
 
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
@@ -82,7 +83,7 @@ public interface PacienteControllerDoc {
             }
     )
     @PostMapping
-    ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente);
+    ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente) throws BancoDeDadosException;
 
 
     @Operation(

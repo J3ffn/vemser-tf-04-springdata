@@ -1,6 +1,7 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.MedicoControllerDoc;
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
@@ -48,7 +49,7 @@ public class MedicoController implements MedicoControllerDoc {
     }
 
     @PostMapping()
-    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) {
+    public ResponseEntity<MedicoOutputDTO> save(@Valid @RequestBody MedicoInputDTO medicoInputDTO) throws BancoDeDadosException {
         MedicoOutputDTO medicoCriado = medicoService.save(medicoInputDTO);
         return new ResponseEntity<>(medicoCriado, HttpStatus.OK);
     }

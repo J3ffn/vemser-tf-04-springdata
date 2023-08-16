@@ -1,6 +1,7 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.PacienteControllerDoc;
+import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteAtendimentosOutputDTO;
 import br.com.dbc.wbhealth.model.dto.paciente.PacienteInputDTO;
@@ -48,7 +49,7 @@ public class PacienteController implements PacienteControllerDoc {
 
     @Override
     @PostMapping
-    public ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente) {
+    public ResponseEntity<PacienteOutputDTO> save(@RequestBody @Valid PacienteInputDTO paciente) throws BancoDeDadosException {
         PacienteOutputDTO pacienteCriado = pacienteService.save(paciente);
         return new ResponseEntity<>(pacienteCriado, HttpStatus.OK);
     }
