@@ -1,6 +1,5 @@
 package br.com.dbc.wbhealth.model.dto.atendimento;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;

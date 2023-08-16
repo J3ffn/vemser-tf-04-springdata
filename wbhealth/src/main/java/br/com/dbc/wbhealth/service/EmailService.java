@@ -1,34 +1,23 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
-import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
-import br.com.dbc.wbhealth.utils.ImageConverter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import javassist.ClassPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.io.File;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 @Component
 @RequiredArgsConstructor

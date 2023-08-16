@@ -1,13 +1,17 @@
 package br.com.dbc.wbhealth.documentation;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,17 +33,6 @@ public interface AtendimentoControllerDoc {
     @GetMapping
     ResponseEntity<List<AtendimentoOutputDTO>> findAll() throws BancoDeDadosException;
 
-    @Operation(summary = "Adicionar atendimento.", description = "Adiciona um atendimento ao banco de dados.")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(responseCode = "200", description = "Retorna o atendimento salvo."),
-                    @ApiResponse(responseCode = "400", description = "Não foi possível registar o atendimento no banco."),
-                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
-                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
-            }
-    )
-    @PostMapping
-    ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
     @Operation(summary = "Buscar atendimento pelo ID.", description = "Busca um atendimento pelo seu ID.")
     @ApiResponses(
@@ -66,6 +59,46 @@ public interface AtendimentoControllerDoc {
     )
     @GetMapping("/paciente/{idPaciente}")
     ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws BancoDeDadosException;
+
+    @Operation(summary = "Buscar atendimentos paginados.", description = "Busca todos os atendimentos registrados, porém, paginado.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna os atendimentos paginados."),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível buscar os atendimentos."),
+                    @ApiResponse(responseCode = "404", description = "Nenhum atendimento foi encontrado."),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+            }
+    )
+    @GetMapping("/paginado")
+    ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(@RequestParam Integer pagina, @RequestParam Integer quantidade);
+
+    @Operation(summary = "Buscar atendimentos paginados entre datas.", description = "Busca todos os atendimentos registrados entre as datas passadas, porém, paginado.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna os atendimentos paginados."),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível buscar os atendimentos."),
+                    @ApiResponse(responseCode = "404", description = "Nenhum atendimento foi encontrado."),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+            }
+    )
+    @GetMapping("/paginado/data")
+    ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
+                                                                            @RequestParam String dataInicio,
+                                                                            @RequestParam String dataFinal) throws DataInvalidaException;
+
+    @Operation(summary = "Adicionar atendimento.", description = "Adiciona um atendimento ao banco de dados.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Retorna o atendimento salvo."),
+                    @ApiResponse(responseCode = "400", description = "Não foi possível registar o atendimento no banco."),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso."),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção.")
+            }
+    )
+    @PostMapping
+    ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException;
 
     @Operation(summary = "Alterar informações de um atendimento.", description = "Altera informações de um atendimento com o id passado.")
     @ApiResponses(

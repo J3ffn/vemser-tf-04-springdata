@@ -5,27 +5,21 @@ import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.*;
+import br.com.dbc.wbhealth.model.entity.AtendimentoEntity;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PacienteEntity;
 import br.com.dbc.wbhealth.model.enumarator.TipoDeAtendimento;
 import br.com.dbc.wbhealth.model.enumarator.TipoEmail;
 import br.com.dbc.wbhealth.repository.AtendimentoRepository;
-import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import freemarker.template.Configuration;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
