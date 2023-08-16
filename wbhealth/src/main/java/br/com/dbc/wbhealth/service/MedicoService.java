@@ -1,8 +1,10 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.MedicoEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
 import br.com.dbc.wbhealth.repository.MedicoRepository;
@@ -18,6 +20,7 @@ import java.util.List;
 public class MedicoService {
     private final MedicoRepository medicoRepository;
     private final PessoaRepository pessoaRepository;
+    private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
     public List<MedicoOutputDTO> findAll(){
@@ -79,17 +82,23 @@ public class MedicoService {
                 medicoInput.getSalarioMensal(),
                 medicoInput.getEmail()
         );
+
     }
     public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) {
         MedicoEntity medico = new MedicoEntity();
         medico.setPessoa(pessoa);
         medico.setCrm(medicoInput.getCrm());
-        medico.setIdHospital(medicoInput.getIdHospital());
+
+        HospitalOutputDTO hospitalOutput = hospitalService.findById(medicoInput.getIdHospital());
+        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        medico.setHospitalEntity(hospital);
+
         return medico;
     }
 
     public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
         MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
+        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
 
         PessoaEntity pessoa = medico.getPessoa();
         medicoOutput.setNome(pessoa.getNome());
