@@ -58,8 +58,6 @@ public class PacienteService {
         PacienteEntity paciente = convertInputToPaciente(pessoaCriada, pacienteInput);
         PacienteEntity pacienteCriado = pacienteRepository.save(paciente);
 
-        pacienteCriado.getHospitalEntity().getPacientes().add(pacienteCriado);
-
         return convertPacienteToOutput(pacienteCriado);
     }
 
