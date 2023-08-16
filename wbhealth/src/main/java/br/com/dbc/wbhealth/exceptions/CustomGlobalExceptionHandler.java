@@ -89,4 +89,9 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                                                   HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(createBody(exception));
     }
+
+    @ExceptionHandler(DataInvalidaException.class)
+    public ResponseEntity<Object> hancleException(DataInvalidaException exception, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(createBody(exception));
+    }
 }

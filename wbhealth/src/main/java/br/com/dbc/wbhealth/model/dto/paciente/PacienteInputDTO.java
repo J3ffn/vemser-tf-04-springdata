@@ -15,21 +15,17 @@ public class PacienteInputDTO {
 
     @NotBlank
     @Size(min = 8, max = 8)
-    @Schema(description = "Número CEP do paciente", required = true)
+    @Schema(description = "Número CEP do paciente", example = "12345678", required = true)
     private String cep;
 
     @NotNull
     @PastOrPresent
-    @Schema(description = "Data de nascimento do paciente", required = true)
+    @Schema(description = "Data de nascimento do paciente",  example = "1995-04-22", required = true)
     private LocalDate dataNascimento;
 
     @CPF
-    @Schema(description = "Número de CPF do paciente", required = true)
+    @Schema(description = "Número de CPF do paciente",  example = "28283051040", required = true)
     private String cpf;
-
-    @PositiveOrZero
-    @Schema(description = "Salário mensal do paciente")
-    private Double salarioMensal;
 
     @Email
     @NotBlank

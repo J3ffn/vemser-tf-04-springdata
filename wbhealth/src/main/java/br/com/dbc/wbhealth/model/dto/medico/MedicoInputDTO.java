@@ -14,31 +14,41 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class MedicoInputDTO {
     @NotBlank
-    @Schema(description = "Nome do medico", required = true)
+    @Schema(description = "Nome do médico", required = true)
     private String nome;
-    @Schema(description = "Cep do medico", example = "12345678", required = true)
+
     @NotBlank
     @Size(min = 8, max = 8)
+    @Schema(description = "Número CEP do médico", example = "12345678", required = true)
     private String cep;
-    @Schema(description = "Data de nascimento do medico", example = "22-04-1995", required = true)
+
     @NotNull
     @PastOrPresent
+    @Schema(description = "Data de nascimento do médico", example = "1995-04-22", required = true)
     private LocalDate dataNascimento;
-    @Schema(description = "CPF do medico", example = "28283051040", required = true)
+
     @CPF
+    @Schema(description = "Número de CPF do médico", example = "28283051040", required = true)
     private String cpf;
-    @Schema(description = "Salario do medico", example = "9000.00", required = true)
+
+    @NotNull
     @PositiveOrZero
+    @Schema(description = "Salário mensal do médico", example = "9000", required = true)
     private Double salarioMensal;
-    @Schema(description = "Id do hospital onde o medico trabalha", example = "1", required = true)
+
+    @Email
+    @NotBlank
+    @Schema(description = "Email pessoal do médico", required = true)
+    private String email;
+
+    @NotNull
     @Positive
+    @Schema(description = "Identificador do hospital onde o medico trabalha", required = true)
     private Integer idHospital;
-    @Schema(description = "CRM do medico", example = "AM-7654321/82", required = true)
+
     @NotBlank
     @Size(min = 13, max = 13)
+    @Schema(description = "CRM do medico", example = "AM-7654321/82", required = true)
     private String crm;
-    @NotBlank
-    @Email
-    private String email;
 
 }

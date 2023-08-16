@@ -1,123 +1,146 @@
 package br.com.dbc.wbhealth.service;
 
-import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
-import br.com.dbc.wbhealth.model.entity.Medico;
+import br.com.dbc.wbhealth.model.dto.medico.PeriodoDTO;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
+import br.com.dbc.wbhealth.model.entity.PessoaEntity;
+import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import br.com.dbc.wbhealth.repository.MedicoRepository;
+import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MedicoService {
-
     private final MedicoRepository medicoRepository;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final PessoaRepository pessoaRepository;
+    private final AtendimentoRepository atendimentoRepository;
+    private final HospitalService hospitalService;
+    private final ObjectMapper objectMapper;
 
-    public MedicoService(MedicoRepository medicoRepository) {
-        this.medicoRepository = medicoRepository;
+    public List<MedicoOutputDTO> findAll(Pageable pageable){
+        return medicoRepository.findAll(pageable)
+                .getContent().stream().map(this::converterMedicoOutput).toList();
     }
 
-//    public boolean buscarCpf(Medico medico) {
-//        return medicoRepository.buscarCpf(medico);
-//    }
+    public MedicoOutputDTO findById(Integer idMedico) throws EntityNotFound {
+        MedicoEntity medicoEncontrado = medicoRepository.findById(idMedico).get();
+        return converterMedicoOutput(medicoEncontrado);
+    }
 
+    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO){
 
-//    objectMapper.registerModule(new JavaTimeModule());
+        PessoaEntity pessoaEntity = convertInputToPessoa(medicoInputDTO);
 
+        PessoaEntity pessoaSave = pessoaRepository.save(pessoaEntity);
 
-//    public Medico buscarId(Integer id) throws BancoDeDadosException {
-//        return medicoRepository.findById(id);
+        MedicoEntity medico = convertInputToMedico(pessoaSave, medicoInputDTO);
+        MedicoEntity medicoAtualizado = medicoRepository.save(medico);
 
-    public MedicoOutputDTO save(MedicoInputDTO medicoInputDTO) {
-        Medico medico = new Medico();
-        medico = objectMapper.convertValue(medicoInputDTO, Medico.class);
-        MedicoOutputDTO medicoOutputDTO = new MedicoOutputDTO();
-        try {
-            Medico medicoAtualizado = medicoRepository.save(medico);
-            medicoOutputDTO = objectMapper.convertValue(medicoAtualizado, MedicoOutputDTO.class);
-//            String cpf = medicoInputDTO.getCpf().replaceAll("[^0-9]", "");
-//            if (cpf.length() != 11) {
-//                throw new Exception("CPF Invalido!");
-//            }
-//            medico.setCpf(cpf);
+        return converterMedicoOutput(medicoAtualizado);
+    }
 
-//            String cep = medico.getCep().replaceAll("[^0-9]", "");
-//            if (cep.length() != 8) {
-//                throw new Exception("CEP inválido! Deve conter exatamente 8 dígitos numéricos.");
-//            }
+    public MedicoOutputDTO update(Integer idMedico, MedicoInputDTO medicoInput) throws EntityNotFound {
+        PessoaEntity pessoaModificada = convertInputToPessoa(medicoInput);
+        MedicoEntity medicoModificado = convertInputToMedico(pessoaModificada, medicoInput);
 
-//            String crm = medicoInputDTO.getCrm().replaceAll("^[A-Z]{2}-\\\\d{7}/\\\\d{2}$", "");
-//            if(crm.length() != 13){
-//                throw new Exception("CRM invalido. Deve ser digitado no formato: UF-1234567/89.");
-//            }
-//            medico.setCep(cep);
-//            medicoRepository.save(medico);
-//            novoMedico= medico;
-//            System.out.println(CoresMenu.VERDE_BOLD + "\nOperação realizada com sucesso!" + CoresMenu.RESET);
+        MedicoEntity medico = getMedicoById(idMedico);
+        PessoaEntity pessoa = medico.getPessoa();
 
-        } catch (BancoDeDadosException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println("Unnexpected error: " + e.getMessage());
+        pessoa.setNome(medicoModificado.getPessoa().getNome());
+        pessoa.setCep(medicoModificado.getPessoa().getCep());
+        pessoa.setDataNascimento(medicoModificado.getPessoa().getDataNascimento());
+        pessoa.setCpf(medicoModificado.getPessoa().getCpf());
+        pessoa.setSalarioMensal(medicoModificado.getPessoa().getSalarioMensal());
+        pessoa.setEmail(medicoModificado.getPessoa().getEmail());
+
+        pessoaRepository.save(medico.getPessoa());
+        MedicoEntity medicoAtualizado = medicoRepository.save(medico);
+
+        return converterMedicoOutput(medicoAtualizado);
+    }
+
+    public void delete(Integer idMedico) throws EntityNotFound {
+        MedicoEntity medico = getMedicoById(idMedico);
+        medicoRepository.delete(medico);
+    }
+
+    protected MedicoEntity getMedicoById(Integer idMedico) throws EntityNotFound {
+        return medicoRepository.findById(idMedico)
+                .orElseThrow(() -> new EntityNotFound("Médico não encontrado"));
+    }
+
+    private PessoaEntity convertInputToPessoa(MedicoInputDTO medicoInput){
+        return new PessoaEntity(
+                medicoInput.getNome(),
+                medicoInput.getCep(),
+                medicoInput.getDataNascimento(),
+                medicoInput.getCpf(),
+                medicoInput.getSalarioMensal(),
+                medicoInput.getEmail()
+        );
+
+    }
+    public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) {
+        MedicoEntity medico = new MedicoEntity();
+        medico.setPessoa(pessoa);
+        medico.setCrm(medicoInput.getCrm());
+
+        HospitalOutputDTO hospitalOutput = hospitalService.findById(medicoInput.getIdHospital());
+        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        medico.setHospitalEntity(hospital);
+
+        return medico;
+    }
+
+    public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
+        MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
+        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
+
+        PessoaEntity pessoa = medico.getPessoa();
+        medicoOutput.setNome(pessoa.getNome());
+        medicoOutput.setCep(pessoa.getCep());
+        medicoOutput.setDataNascimento(pessoa.getDataNascimento());
+        medicoOutput.setCpf(pessoa.getCpf());
+        medicoOutput.setSalarioMensal(pessoa.getSalarioMensal());
+        medicoOutput.setEmail(pessoa.getEmail());
+        medicoOutput.setIdPessoa(pessoa.getIdPessoa());
+
+        return medicoOutput;
+    }
+
+    public List<MedicoAtendimentoDTO> generateMedicoAtendimento(Integer idMedico, LocalDate dataInicio, LocalDate dataFim) throws EntityNotFound {
+        MedicoEntity medico = getMedicoById(idMedico);
+        if(medico == null) {
+            throw new EntityNotFound("Médico não encontrado com o ID: " + idMedico);
         }
-        return medicoOutputDTO;
-    }
 
-    public List<MedicoOutputDTO> findAll() throws BancoDeDadosException {
-        return medicoRepository.findAll()
-                .stream()
-                .map(medico -> objectMapper.convertValue(medico, MedicoOutputDTO.class))
-                .toList();
-    }
+        Long quantidadeAtendimentos = atendimentoRepository.countAtendimentosByMedicoAndDateRange(medico, dataInicio, dataFim);
 
-    public MedicoOutputDTO findById(Integer id) throws BancoDeDadosException, EntityNotFound {
-        Medico medico = medicoRepository.findById(id);
-        return objectMapper.convertValue(medico, MedicoOutputDTO.class);
-    }
+        List<MedicoAtendimentoDTO> atendimento = new ArrayList<>();
+        MedicoAtendimentoDTO medicoAtendimentoDTO = new MedicoAtendimentoDTO();
+        medicoAtendimentoDTO.setNomeMedico(medico.getPessoa().getNome());
+        medicoAtendimentoDTO.setCrm(medico.getCrm());
+        medicoAtendimentoDTO.setQuantidadeAtendimentos(quantidadeAtendimentos);
 
-    public MedicoOutputDTO update(Integer idMedico, MedicoInputDTO medicoInputDTO) throws BancoDeDadosException, EntityNotFound {
-        Medico medico = new Medico();
-        try {
-            Medico medicoAux = medicoRepository.findAll().stream()
-                    .filter(x -> x.getIdMedico() == idMedico)
-                    .findFirst().orElseThrow(() -> new EntityNotFound("Id não encontrado"));
-            medicoAux.setCpf(medicoInputDTO.getCpf());
-            medicoAux.setCrm(medicoInputDTO.getCrm());
-            medicoAux.setCep(medicoInputDTO.getCep());
-            medicoAux.setNome(medicoInputDTO.getNome());
-            medicoAux.setDataNascimento(medicoInputDTO.getDataNascimento());
-            medicoAux.setSalarioMensal(medicoInputDTO.getSalarioMensal());
-            medicoAux.setEmail(medicoInputDTO.getEmail());
-            medico = medicoRepository.findById(idMedico);
+        PeriodoDTO periodoDTO = new PeriodoDTO(dataInicio, dataFim);
+        medicoAtendimentoDTO.setPeriodo(periodoDTO);
 
-        } catch (BancoDeDadosException e) {
-            e.printStackTrace();
+        atendimento.add(medicoAtendimentoDTO);
 
-        } catch (EntityNotFound e) {
-            throw new EntityNotFound("Medico não encontrado!");
-        }
-        return objectMapper.convertValue(medico, MedicoOutputDTO.class);
-    }
-
-    public String deletarPeloId(Integer id) throws EntityNotFound {
-        String retorno = new String();
-        try {
-            boolean removeu = medicoRepository.deleteById(id);
-            if (removeu) {
-                retorno = "Medico deletado com sucesso.";
-            }
-
-        } catch (BancoDeDadosException | EntityNotFound e) {
-            e.printStackTrace();
-        }
-        return retorno;
-
+        return atendimento;
     }
 
 }

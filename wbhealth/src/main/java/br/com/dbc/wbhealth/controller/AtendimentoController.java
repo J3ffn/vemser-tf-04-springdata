@@ -2,11 +2,15 @@ package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.AtendimentoControllerDoc;
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
 import br.com.dbc.wbhealth.service.AtendimentoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,23 +24,14 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/atendimento")
+@RequiredArgsConstructor
 public class AtendimentoController implements AtendimentoControllerDoc {
 
-    private AtendimentoService atendimentoService;
-
-    @Autowired
-    public AtendimentoController(AtendimentoService atendimentoService) {
-        this.atendimentoService = atendimentoService;
-    }
+    private final AtendimentoService atendimentoService;
 
     @GetMapping
     public ResponseEntity<List<AtendimentoOutputDTO>> findAll() throws BancoDeDadosException {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAll());
-    }
-
-    @PostMapping
-    public ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException {
-        return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoService.save(novoAtendimento));
     }
 
     @GetMapping("/{idAtendimento}")
@@ -47,6 +42,25 @@ public class AtendimentoController implements AtendimentoControllerDoc {
     @GetMapping("/paciente/{idPaciente}")
     public ResponseEntity<List<AtendimentoOutputDTO>> bucarAtendimentoPeloIdUsuario(@Positive(message = "Deve ser positivo") @PathVariable Integer idPaciente) throws BancoDeDadosException {
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.bucarAtendimentoPeloIdUsuario(idPaciente));
+    }
+
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginada(@RequestParam Integer pagina, @RequestParam Integer quantidade) {
+        Pageable paginacao = PageRequest.of(pagina, quantidade);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginada(paginacao));
+    }
+
+    @GetMapping("/paginado/data")
+    public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
+                                                                            @RequestParam String dataInicio,
+                                                                            @RequestParam String dataFinal) throws DataInvalidaException {
+        Pageable paginacao = PageRequest.of(pagina, quantidade);
+        return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, paginacao));
+    }
+
+    @PostMapping
+    public ResponseEntity<AtendimentoOutputDTO> save(@Valid @RequestBody AtendimentoInputDTO novoAtendimento) throws BancoDeDadosException, EntityNotFound, MessagingException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(atendimentoService.save(novoAtendimento));
     }
 
     @PutMapping("/{idAtendimento}")
