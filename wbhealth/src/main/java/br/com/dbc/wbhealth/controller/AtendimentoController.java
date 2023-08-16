@@ -2,6 +2,7 @@ package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.AtendimentoControllerDoc;
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
@@ -59,8 +60,8 @@ public class AtendimentoController implements AtendimentoControllerDoc {
 
     @GetMapping("/paginado/data")
     public ResponseEntity<Page<AtendimentoOutputDTO>> findAllPaginadaByData(@RequestParam Integer pagina, @RequestParam Integer quantidade,
-                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd") LocalDate dataInicio,
-                                                                            @RequestParam @DateTimeFormat(pattern = "yyyy-mm-dd")  LocalDate dataFinal) {
+                                                                            @RequestParam String dataInicio,
+                                                                            @RequestParam String dataFinal) throws DataInvalidaException {
         Pageable paginacao = PageRequest.of(pagina, quantidade);
         return ResponseEntity.status(HttpStatus.OK).body(atendimentoService.findAllPaginadaByData(dataInicio, dataFinal, paginacao));
     }

@@ -45,19 +45,22 @@ public class EmailService {
     private String emailSuporte;
 
     public void sendEmailAtendimento(AtendimentoEntity atendimento, TipoEmail tipoEmail) throws MessagingException {
-        sendTemplateEmail(atendimento, "email-atendimento.ftl", tipoEmail);
+        sendTemplateEmail(atendimento, tipoEmail);
     }
 
-    public void sendTemplateEmail(AtendimentoEntity atendimento, String estrutura, TipoEmail tipoEmail) throws MessagingException {
+    public void sendTemplateEmail(AtendimentoEntity atendimento, TipoEmail tipoEmail) throws MessagingException {
         MimeMessage emailTemplate = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(emailTemplate, true);
         PessoaEntity paciente = atendimento.getPacienteEntity().getPessoa();
+
+        this.enviarParaMedico(helper, atendimento.getMedicoEntity().getPessoa(), tipoEmail, atendimento);
+        this.enviatParaPaciente(helper, atendimento.getPacienteEntity().getPessoa(), tipoEmail, atendimento);
 
         try {
             helper.setFrom(from);
             helper.setTo(paciente.getEmail());
             helper.setSubject(tipoEmail.getTitulo());
-            helper.setText(getContentFromTemplate(paciente, estrutura, tipoEmail, atendimento), true);
+            helper.setText(getContentFromTemplate(paciente, tipoEmail, atendimento), true);
 
             mailSender.send(helper.getMimeMessage());
 
@@ -66,7 +69,36 @@ public class EmailService {
         }
     }
 
-    private String getContentFromTemplate(PessoaEntity paciente, String estruturaTemplate, TipoEmail tipoEmail, AtendimentoEntity atendimento) throws IOException, TemplateException {
+    private void enviarParaMedico(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail, AtendimentoEntity atendimento) {
+        try {
+            helper.setFrom(from);
+            helper.setTo(pessoa.getEmail());
+            helper.setSubject(tipoEmail.getTitulo());
+            helper.setText(getContentFromTemplate(pessoa, tipoEmail, atendimento), true);
+
+            mailSender.send(helper.getMimeMessage());
+
+        } catch (IOException | TemplateException | MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void enviatParaPaciente(MimeMessageHelper helper, PessoaEntity pessoa, TipoEmail tipoEmail, AtendimentoEntity atendimento) {
+        try {
+            helper.setFrom(from);
+            helper.setTo(pessoa.getEmail());
+            helper.setSubject(tipoEmail.getTitulo());
+            helper.setText(getContentFromTemplate(pessoa, tipoEmail, atendimento), true);
+
+            mailSender.send(helper.getMimeMessage());
+
+        } catch (IOException | TemplateException | MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getContentFromTemplate(PessoaEntity paciente, TipoEmail tipoEmail, AtendimentoEntity atendimento) throws IOException, TemplateException {
+        String estruturaTemplate = null;
         Map<String, Object> dados = new HashMap<>();
         dados.put("nome", paciente.getNome());
         dados.put("id", paciente.getIdPessoa().toString());
@@ -81,7 +113,9 @@ public class EmailService {
         StringBuilder estruturaDaMensagem = new StringBuilder();
 
         switch (tipoEmail) {
-            case CONFIRMACAO -> estruturaDaMensagem.append("Seu atendimento foi confirmado!");
+            case CONFIRMACAO -> { estruturaTemplate = "";
+                estruturaDaMensagem.append("Seu atendimento foi confirmado!");
+            }
             case ATUALIZACAO -> estruturaDaMensagem.append("Seu atendimento foi atulizado!");
             case CANCELAMENTO -> estruturaDaMensagem.append("Seu atendimento foi desmarcado!");
         }

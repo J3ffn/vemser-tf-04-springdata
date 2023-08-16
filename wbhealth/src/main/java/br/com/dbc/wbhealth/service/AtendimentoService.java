@@ -1,6 +1,7 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.BancoDeDadosException;
+import br.com.dbc.wbhealth.exceptions.DataInvalidaException;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoInputDTO;
 import br.com.dbc.wbhealth.model.dto.atendimento.AtendimentoOutputDTO;
@@ -15,12 +16,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.List;
 
@@ -41,7 +45,7 @@ public class AtendimentoService {
     private final HospitalService hospitalService;
 
     private void enviarEmails(AtendimentoEntity atendimento, TipoEmail tipo) throws MessagingException, BancoDeDadosException, EntityNotFound {
-//        emailService.sendEmailAtendimento(atendimento, tipo);
+        emailService.sendEmailAtendimento(atendimento, tipo);
 
     }
 
@@ -169,7 +173,15 @@ public class AtendimentoService {
         return atendimentoRepository.findAll(paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 
-    public Page<AtendimentoOutputDTO> findAllPaginadaByData(LocalDate inicio, LocalDate fim, Pageable paginacao) {
-        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(inicio, fim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
+    public Page<AtendimentoOutputDTO> findAllPaginadaByData(String inicio, String fim, Pageable paginacao) throws DataInvalidaException {
+        LocalDate dataInicio;
+        LocalDate dataFim;
+        try {
+            dataInicio = LocalDate.parse(inicio);
+            dataFim = LocalDate.parse(fim);
+        } catch (Exception e) {
+            throw new DataInvalidaException("Data inválida!");
+        }
+        return atendimentoRepository.findAtendimentoEntitiesByDataAtendimentoBetween(dataInicio, dataFim, paginacao).map(this::atendimentoEntityToAtendimentoOutput);
     }
 }
