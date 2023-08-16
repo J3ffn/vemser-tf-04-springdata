@@ -27,11 +27,6 @@ public class PacienteInputDTO {
     @Schema(description = "Número de CPF do paciente",  example = "28283051040", required = true)
     private String cpf;
 
-    @NotNull
-    @PositiveOrZero
-    @Schema(description = "Salário mensal do paciente", example = "9000", required = true)
-    private Double salarioMensal;
-
     @Email
     @NotBlank
     @Schema(description = "Email pessoal do paciente", required = true)

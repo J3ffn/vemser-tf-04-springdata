@@ -2,10 +2,17 @@ package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.MedicoControllerDoc;
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
+import br.com.dbc.wbhealth.model.entity.MedicoEntity;
 import br.com.dbc.wbhealth.service.MedicoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 import java.util.List;
 
 @Validated
@@ -24,8 +33,14 @@ public class MedicoController implements MedicoControllerDoc {
     private final MedicoService medicoService;
 
     @GetMapping
-    public ResponseEntity<List<MedicoOutputDTO>> findAll() {
-        return new ResponseEntity<>(medicoService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<MedicoOutputDTO>> findAll(
+            @RequestParam(name = "pagina", defaultValue = "0") @PositiveOrZero Integer pagina,
+            @RequestParam(name = "quantidadeRegistros", defaultValue = "5") @Positive Integer quantidadeRegistros) {
+
+        Sort ordenacao = Sort.by("idMedico");
+        Pageable pageable = PageRequest.of(pagina, quantidadeRegistros, ordenacao);
+
+        return new ResponseEntity<>(medicoService.findAll(pageable), HttpStatus.OK);
     }
 
     @GetMapping("/{idMedico}")
@@ -51,5 +66,14 @@ public class MedicoController implements MedicoControllerDoc {
     public ResponseEntity<Void> deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound {
         medicoService.delete(idMedico);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{medicoId}/atendimentos")
+    public ResponseEntity<List<MedicoAtendimentoDTO>> generateMedicoAtendimento(
+            @PathVariable Integer medicoId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataFim) throws EntityNotFound {
+        List<MedicoAtendimentoDTO> report = medicoService.generateMedicoAtendimento(medicoId, dataInicio, dataFim);
+        return ResponseEntity.ok(report);
     }
 }

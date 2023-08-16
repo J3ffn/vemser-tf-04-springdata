@@ -1,6 +1,7 @@
 package br.com.dbc.wbhealth.controller;
 
 import br.com.dbc.wbhealth.documentation.HospitalControllerDoc;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalInputDTO;
 import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
 import br.com.dbc.wbhealth.service.HospitalService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -27,6 +29,12 @@ public class HospitalController implements HospitalControllerDoc {
     @GetMapping
     public ResponseEntity<List<HospitalOutputDTO>> findAll() {
         return ResponseEntity.status(HttpStatus.OK).body(hospitalService.findAll());
+    }
+
+    @GetMapping("/atendimentos")
+    public List<HospitalAtendimentoDTO> findHospitaisWithAllAtendimentos(@RequestParam @PositiveOrZero Integer pagina,
+                                                            @RequestParam @Positive Integer quantidadeRegistros){
+        return hospitalService.findHospitaisWithAllAtendimentos(pagina, quantidadeRegistros);
     }
 
     @GetMapping("/{idHospital}")
@@ -49,4 +57,7 @@ public class HospitalController implements HospitalControllerDoc {
         hospitalService.deleteById(idHospital);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+
+
 }

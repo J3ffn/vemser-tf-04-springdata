@@ -19,9 +19,6 @@ public class MedicoEntity implements Pagamento {
     @Column(name = "id_medico")
     private Integer idMedico;
 
-    @Column(name = "id_hospital")
-    private Integer idHospital;
-
     @Column(name = "crm")
     private String crm;
 
@@ -29,6 +26,11 @@ public class MedicoEntity implements Pagamento {
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "id_pessoa", referencedColumnName = "id_pessoa")
     private PessoaEntity pessoa;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "id_hospital", referencedColumnName = "id_hospital")
+    private HospitalEntity hospitalEntity;
 
     @JsonIgnore
     @OneToMany(mappedBy = "medicoEntity", cascade = CascadeType.ALL, orphanRemoval = true)

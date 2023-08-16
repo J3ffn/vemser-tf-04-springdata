@@ -1,16 +1,20 @@
 package br.com.dbc.wbhealth.documentation;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MedicoControllerDoc {
@@ -23,7 +27,8 @@ public interface MedicoControllerDoc {
             }
     )
     @GetMapping
-    ResponseEntity<List<MedicoOutputDTO>> findAll();
+    ResponseEntity<List<MedicoOutputDTO>> findAll(@RequestParam @PositiveOrZero Integer pagina,
+                                                  @RequestParam @Positive Integer quantidadeRegistros);
 
     @Operation(summary = "Retornar medico por id", description = "Retorna um DTO com os dados do medico cujo id corresponde ao id recebido por pathVariable.")
     @ApiResponses(
@@ -71,4 +76,19 @@ public interface MedicoControllerDoc {
     )
     @DeleteMapping("/{idMedico}")
     ResponseEntity<Void> deleteById(@PathVariable @Positive Integer idMedico) throws EntityNotFound;
+
+    @Operation(summary = "Retorna um relatório com a quantidade de atendimentos no período",
+            description = "Retorna um relatório com a quantidade de atendimentos no período")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "Relatório gerado com sucesso!"),
+                    @ApiResponse(responseCode = "403", description = "Você não tem permissão para acessar este recurso"),
+                    @ApiResponse(responseCode = "500", description = "Foi gerada uma exceção")
+            }
+    )
+    @GetMapping("/{medicoId}/atendimentos")
+    public ResponseEntity<List<MedicoAtendimentoDTO>> generateMedicoAtendimento(
+            @PathVariable Integer medicoId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dataFim) throws EntityNotFound;
 }

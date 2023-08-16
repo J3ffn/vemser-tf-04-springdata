@@ -1,16 +1,27 @@
 package br.com.dbc.wbhealth.service;
 
 import br.com.dbc.wbhealth.exceptions.EntityNotFound;
+import br.com.dbc.wbhealth.model.dto.hospital.HospitalOutputDTO;
+import br.com.dbc.wbhealth.model.dto.medico.MedicoAtendimentoDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoInputDTO;
 import br.com.dbc.wbhealth.model.dto.medico.MedicoOutputDTO;
+import br.com.dbc.wbhealth.model.dto.medico.PeriodoDTO;
+import br.com.dbc.wbhealth.model.entity.HospitalEntity;
 import br.com.dbc.wbhealth.model.entity.MedicoEntity;
 import br.com.dbc.wbhealth.model.entity.PessoaEntity;
+import br.com.dbc.wbhealth.repository.AtendimentoRepository;
 import br.com.dbc.wbhealth.repository.MedicoRepository;
 import br.com.dbc.wbhealth.repository.PessoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -18,10 +29,13 @@ import java.util.List;
 public class MedicoService {
     private final MedicoRepository medicoRepository;
     private final PessoaRepository pessoaRepository;
+    private final AtendimentoRepository atendimentoRepository;
+    private final HospitalService hospitalService;
     private final ObjectMapper objectMapper;
 
-    public List<MedicoOutputDTO> findAll(){
-        return medicoRepository.findAll().stream().map(this::converterMedicoOutput).toList();
+    public List<MedicoOutputDTO> findAll(Pageable pageable){
+        return medicoRepository.findAll(pageable)
+                .getContent().stream().map(this::converterMedicoOutput).toList();
     }
 
     public MedicoOutputDTO findById(Integer idMedico) throws EntityNotFound {
@@ -79,17 +93,23 @@ public class MedicoService {
                 medicoInput.getSalarioMensal(),
                 medicoInput.getEmail()
         );
+
     }
     public MedicoEntity convertInputToMedico(PessoaEntity pessoa, MedicoInputDTO medicoInput) {
         MedicoEntity medico = new MedicoEntity();
         medico.setPessoa(pessoa);
         medico.setCrm(medicoInput.getCrm());
-        medico.setIdHospital(medicoInput.getIdHospital());
+
+        HospitalOutputDTO hospitalOutput = hospitalService.findById(medicoInput.getIdHospital());
+        HospitalEntity hospital = objectMapper.convertValue(hospitalOutput, HospitalEntity.class);
+        medico.setHospitalEntity(hospital);
+
         return medico;
     }
 
     public MedicoOutputDTO converterMedicoOutput(MedicoEntity medico) {
         MedicoOutputDTO medicoOutput = objectMapper.convertValue(medico, MedicoOutputDTO.class);
+        medicoOutput.setIdHospital(medico.getHospitalEntity().getIdHospital());
 
         PessoaEntity pessoa = medico.getPessoa();
         medicoOutput.setNome(pessoa.getNome());
@@ -101,6 +121,28 @@ public class MedicoService {
         medicoOutput.setIdPessoa(pessoa.getIdPessoa());
 
         return medicoOutput;
+    }
+
+    public List<MedicoAtendimentoDTO> generateMedicoAtendimento(Integer idMedico, LocalDate dataInicio, LocalDate dataFim) throws EntityNotFound {
+        MedicoEntity medico = getMedicoById(idMedico);
+        if(medico == null) {
+            throw new EntityNotFound("Médico não encontrado com o ID: " + idMedico);
+        }
+
+        Long quantidadeAtendimentos = atendimentoRepository.countAtendimentosByMedicoAndDateRange(medico, dataInicio, dataFim);
+
+        List<MedicoAtendimentoDTO> atendimento = new ArrayList<>();
+        MedicoAtendimentoDTO medicoAtendimentoDTO = new MedicoAtendimentoDTO();
+        medicoAtendimentoDTO.setNomeMedico(medico.getPessoa().getNome());
+        medicoAtendimentoDTO.setCrm(medico.getCrm());
+        medicoAtendimentoDTO.setQuantidadeAtendimentos(quantidadeAtendimentos);
+
+        PeriodoDTO periodoDTO = new PeriodoDTO(dataInicio, dataFim);
+        medicoAtendimentoDTO.setPeriodo(periodoDTO);
+
+        atendimento.add(medicoAtendimentoDTO);
+
+        return atendimento;
     }
 
 }
